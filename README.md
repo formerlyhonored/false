@@ -4,7 +4,7 @@
 
 **A fast, quiet, distraction-free web browser built in Rust.**
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue?style=flat-square&color=2563eb)](https://github.com)
+[![Version](https://img.shields.io/badge/version-0.1.3-blue?style=flat-square&color=2563eb)](https://github.com/formerlyhonored/false/releases/latest)
 [![Rust](https://img.shields.io/badge/built%20with-Rust-orange?style=flat-square&logo=rust&color=d97706)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-Proprietary-gray?style=flat-square&color=3f3f46)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-blue?style=flat-square&logo=windows&color=0284c7)](https://microsoft.com/windows)
@@ -78,7 +78,7 @@ flowchart TD
 
 ### Installation
 
-Download the latest installer from the Releases section:
+Download the latest signed installer from the [Releases page](https://github.com/formerlyhonored/false/releases/latest):
 
 1. Run **`FalseSetup.exe`**.
 2. Customize your install directory or desktop shortcut options.
@@ -92,16 +92,16 @@ Prerequisites:
 
 ```powershell
 # Clone the repository
-git clone https://github.com/zaidi/false.git
+git clone https://github.com/formerlyhonored/false.git
 cd false
 
 # Build the complete release package
-.\build_package.ps1 -Version "0.1.0"
+.\build_package.ps1 -Version "0.1.3"
 ```
 
 The build script will produce:
 - `FalseSetup.exe`: Standalone GUI installer
-- `false-v0.1.0.flse`: Modular update package
+- `false-v0.1.3.flse`: Signed modular update package
 
 ---
 

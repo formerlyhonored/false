@@ -1,0 +1,5 @@
+{
+  "version": "0.1.3",
+  "notes": "Fixed the v0.1.2 startup crash, added signed .flse updates, hardened package extraction and installer paths, and added a frontend build guardrail.",
+  "download_url": "https://github.com/formerlyhonored/false/releases/download/v0.1.3/false-v0.1.3.flse"
+}
