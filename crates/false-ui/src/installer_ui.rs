@@ -239,11 +239,12 @@ pub async fn installer_run(
         let target_ui = install_dir.join("false-ui.exe");
 
         let mut copied = false;
-        if current_exe.exists() && current_exe != target_false {
-            if std::fs::copy(&current_exe, &target_false).is_ok() {
-                let _ = std::fs::copy(&current_exe, &target_ui);
-                copied = true;
-            }
+        if current_exe.exists()
+            && current_exe != target_false
+            && std::fs::copy(&current_exe, &target_false).is_ok()
+        {
+            let _ = std::fs::copy(&current_exe, &target_ui);
+            copied = true;
         }
 
         if !copied {

@@ -183,7 +183,7 @@ mod page_capture {
                 let bgra =
                     std::slice::from_raw_parts(bits as *const u8, (width * height * 4) as usize);
                 let mut rgba = Vec::with_capacity(bgra.len());
-                for px in bgra.chunks_exact(4) {
+                for px in bgra.as_chunks::<4>().0 {
                     rgba.extend_from_slice(&[px[2], px[1], px[0], 255]);
                 }
                 Ok((width, height, rgba))
@@ -2247,7 +2247,7 @@ pub fn run() {
                 }
             } else {
                 let db = open_db().unwrap_or_else(|e| {
-                    log_debug(&format!("{}", e));
+                    log_debug(&e);
                     let conn = Connection::open_in_memory().expect("in-memory db");
                     let _ = apply_schema(&conn);
                     Db {

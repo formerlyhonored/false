@@ -41,7 +41,10 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() > 1 {
         if args[1] == "--export-flse" {
-            let version = args.get(2).cloned().unwrap_or_else(|| "0.1.1".to_string());
+            let version = args
+                .get(2)
+                .cloned()
+                .unwrap_or_else(|| env!("CARGO_PKG_VERSION").to_string());
             let out = args
                 .get(3)
                 .map(std::path::PathBuf::from)
