@@ -166,7 +166,7 @@ fn setup_registry(target_exe: &Path, install_dir: &Path, icon_path: &Path) {
     let uninstall_key = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\False";
     let entries = [
         ("DisplayName", "False Browser"),
-        ("DisplayVersion", "0.1.1"),
+        ("DisplayVersion", "0.1.2"),
         ("Publisher", "zaidi"),
         ("DisplayIcon", &format!("{},0", icon_str)),
         ("InstallLocation", &install_str),

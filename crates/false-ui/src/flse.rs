@@ -38,7 +38,7 @@ impl Default for FlseManifest {
     fn default() -> Self {
         Self {
             name: "False Update".to_string(),
-            version: "0.1.1".to_string(),
+            version: "0.1.2".to_string(),
             author: "zaidi".to_string(),
             description: "False browser update package".to_string(),
             created_at: String::new(),

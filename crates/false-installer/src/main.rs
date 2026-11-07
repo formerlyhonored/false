@@ -167,7 +167,7 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\False.UpdatePackage\shell\open\co
 $u = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\False"
 New-Item -Path $u -Force | Out-Null
 Set-ItemProperty -Path $u -Name "DisplayName" -Value "False Browser" -Force
-Set-ItemProperty -Path $u -Name "DisplayVersion" -Value "0.1.1" -Force
+Set-ItemProperty -Path $u -Name "DisplayVersion" -Value "0.1.2" -Force
 Set-ItemProperty -Path $u -Name "Publisher" -Value "zaidi" -Force
 Set-ItemProperty -Path $u -Name "DisplayIcon" -Value "{}" -Force
 Set-ItemProperty -Path $u -Name "InstallLocation" -Value "{}" -Force

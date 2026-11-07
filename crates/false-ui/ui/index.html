@@ -273,43 +273,6 @@ input,textarea{user-select:text!important;-webkit-user-select:text!important;cur
 .dl-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 16px;color:var(--mute);font-size:12px;text-align:center}
 .dl-empty svg{width:26px;height:26px;opacity:.4;stroke:currentColor;fill:none;stroke-width:1.6}
 
-/* Profile Switcher & Popover */
-.profile-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
-.profile-avatar-pill{width:22px;height:22px;border-radius:50%;background:var(--profile-color,#3b82f6);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.14);background-size:cover;background-position:center;text-transform:uppercase;transition:transform .12s ease}
-.profile-btn:hover .profile-avatar-pill{transform:scale(1.06)}
-.profile-pop{position:fixed;top:56px;right:12px;width:320px;background:var(--b2);border:1px solid var(--ln-bright);border-radius:14px;padding:16px;display:none;flex-direction:column;gap:12px;z-index:1000;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.8)}
-.profile-pop.on{display:flex;animation:dlPopIn .18s var(--ease)}
-.profile-head{display:flex;align-items:center;gap:12px}
-.profile-avatar-large{width:42px;height:42px;border-radius:50%;background:var(--profile-color,#3b82f6);color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;border:2px solid rgba(255,255,255,.15);background-size:cover;background-position:center;text-transform:uppercase}
-.profile-meta{flex:1;min-width:0}
-.profile-name{font-size:14px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.profile-sub{font-size:11px;color:var(--mute);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.profile-google-card{background:rgba(255,255,255,.03);border:1px solid var(--ln);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px}
-.profile-google-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:32px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid var(--ln);color:var(--fg);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s}
-.profile-google-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
-.profile-divider{height:1px;background:var(--ln);margin:2px 0}
-.profile-section-title{font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.06em}
-.profile-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;scrollbar-width:thin}
-.profile-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:transparent;border:1px solid transparent;cursor:pointer;transition:background .12s,border-color .12s;text-align:left}
-.profile-item:hover{background:rgba(255,255,255,.04)}
-.profile-item.active{background:rgba(255,255,255,.07);border-color:var(--ln-bright)}
-.profile-item-dot{width:10px;height:10px;border-radius:50%;flex:none}
-.profile-item-info{flex:1;min-width:0}
-.profile-item-name{font-size:12.5px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.profile-item-email{font-size:10.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.profile-item-check{display:none;width:14px;height:14px;stroke:var(--ac);fill:none;stroke-width:2.2}
-.profile-item.active .profile-item-check{display:block}
-.profile-actions{display:flex;align-items:center;gap:8px;margin-top:4px}
-.profile-act-btn{flex:1;height:28px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid var(--ln);color:var(--mute);font-size:11.5px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .12s,color .12s}
-.profile-act-btn:hover{background:rgba(255,255,255,.1);color:var(--fg)}
-.profile-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:10000;display:none;place-items:center;padding:20px}
-.profile-modal-backdrop.on{display:grid;animation:fade .18s var(--ease)}
-.profile-modal{width:100%;max-width:400px;background:var(--b2);border:1px solid var(--ln-bright);border-radius:14px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.85);display:flex;flex-direction:column;gap:14px}
-.profile-color-picker{display:flex;align-items:center;gap:10px;margin-top:4px}
-.profile-color-picker .color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s,border-color .12s}
-.profile-color-picker .color-dot:hover{transform:scale(1.12)}
-.profile-color-picker .color-dot.on{border-color:#fff;transform:scale(1.15)}
-
 /* Tab Sleeping & Audio indicators */
 .tab .zz-badge{display:none;flex:none;width:15px;height:15px;color:var(--mute);opacity:.6;margin-left:auto;margin-right:2px}
 .tab.zz .zz-badge{display:grid;place-items:center}
@@ -737,6 +700,203 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
 .onb-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(10,14,22,.25);border-top-color:#0a0e16;animation:onbSpin .7s linear infinite;display:none;margin-right:8px}
 .onb-btn.loading .onb-spin{display:inline-block}
 @keyframes onbSpin{to{transform:rotate(360deg)}}
+
+
+/* Profile Switcher & Popover */
+.profile-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
+.profile-avatar-pill{width:22px;height:22px;border-radius:50%;background:var(--profile-color,#3b82f6);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.14);background-size:cover;background-position:center;text-transform:uppercase;transition:transform .12s ease}
+.profile-btn:hover .profile-avatar-pill{transform:scale(1.06)}
+.profile-pop{position:fixed;top:56px;right:12px;width:320px;background:var(--b2);border:1px solid var(--ln-bright);border-radius:14px;padding:16px;display:none;flex-direction:column;gap:12px;z-index:1000;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.8)}
+.profile-pop.on{display:flex;animation:dlPopIn .18s var(--ease)}
+.profile-head{display:flex;align-items:center;gap:12px}
+.profile-avatar-large{width:42px;height:42px;border-radius:50%;background:var(--profile-color,#3b82f6);color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;border:2px solid rgba(255,255,255,.15);background-size:cover;background-position:center;text-transform:uppercase}
+.profile-meta{flex:1;min-width:0}
+.profile-name{font-size:14px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-sub{font-size:11px;color:var(--mute);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-google-card{background:rgba(255,255,255,.03);border:1px solid var(--ln);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.profile-google-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:32px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid var(--ln);color:var(--fg);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s}
+.profile-google-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+.profile-divider{height:1px;background:var(--ln);margin:2px 0}
+.profile-section-title{font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.06em}
+.profile-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;scrollbar-width:thin}
+.profile-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:transparent;border:1px solid transparent;cursor:pointer;transition:background .12s,border-color .12s;text-align:left}
+.profile-item:hover{background:rgba(255,255,255,.04)}
+.profile-item.active{background:rgba(255,255,255,.07);border-color:var(--ln-bright)}
+.profile-item-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.profile-item-info{flex:1;min-width:0}
+.profile-item-name{font-size:12.5px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-item-email{font-size:10.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-item-check{display:none;width:14px;height:14px;stroke:var(--ac);fill:none;stroke-width:2.2}
+.profile-item.active .profile-item-check{display:block}
+.profile-actions{display:flex;align-items:center;gap:8px;margin-top:4px}
+.profile-act-btn{flex:1;height:28px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid var(--ln);color:var(--mute);font-size:11.5px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .12s,color .12s}
+.profile-act-btn:hover{background:rgba(255,255,255,.1);color:var(--fg)}
+.profile-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:10000;display:none;place-items:center;padding:20px}
+.profile-modal-backdrop.on{display:grid;animation:fade .18s var(--ease)}
+.profile-modal{width:100%;max-width:400px;background:var(--b2);border:1px solid var(--ln-bright);border-radius:14px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.85);display:flex;flex-direction:column;gap:14px}
+.profile-color-picker{display:flex;align-items:center;gap:10px;margin-top:4px}
+.profile-color-picker .color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s,border-color .12s}
+.profile-color-picker .color-dot:hover{transform:scale(1.12)}
+.profile-color-picker .color-dot.on{border-color:#fff;transform:scale(1.15)}
+
+/* ===== Main menu + context menus ===== */
+.app-menu{position:fixed;display:none;flex-direction:column;width:304px;padding:6px;background:var(--b2);border:1px solid var(--ln-bright);border-radius:13px;box-shadow:0 22px 56px rgba(0,0,0,.72);z-index:170;overflow-y:auto;scrollbar-width:none}
+.app-menu::-webkit-scrollbar{display:none}
+.app-menu.on{display:flex;animation:amIn .2s var(--ease)}
+@keyframes amIn{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:none}}
+.am-i{display:flex;align-items:center;gap:12px;width:100%;padding:8px 10px;border:0;background:none;border-radius:8px;color:var(--fg2);font:inherit;font-size:13px;font-weight:500;text-align:left;cursor:pointer;flex:none;transition:background .12s,color .12s}
+.am-i:hover{background:rgba(var(--w),.09);color:var(--fg)}
+.am-i[disabled]{opacity:.38;pointer-events:none}
+.am-i svg,.am-row>svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.am-i .kb{margin-left:auto;padding-left:14px;font-size:11.5px;color:var(--mute)}
+.am-i .chev{margin-left:auto;width:14px;height:14px;transition:transform .3s var(--ease)}
+.am-i.open .chev{transform:rotate(90deg)}
+.am-sep{height:1px;background:var(--ln);margin:5px 4px;flex:none}
+.am-sub{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s var(--ease);flex:none}
+.am-sub.open{grid-template-rows:1fr}
+.am-sub>div{overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.am-sub .am-i{padding-left:38px}
+.am-row{display:flex;align-items:center;gap:12px;padding:5px 10px;color:var(--fg2);font-size:13px;font-weight:500;flex:none}
+.am-row .grow{flex:1}
+.am-seg{display:flex;gap:2px;padding:2px;border-radius:8px;background:rgba(var(--w),.07)}
+.am-seg button{padding:3px 12px;border-radius:6px;border:0;background:none;color:var(--fg2);font:inherit;font-size:12px;cursor:pointer;transition:background .25s var(--ease),color .2s}
+.am-seg button.on{background:rgba(var(--w),.2);color:var(--fg)}
+.am-zoom button{width:26px;height:26px;border:0;border-radius:6px;background:none;color:var(--fg2);display:grid;place-items:center;font:inherit;font-size:16px;cursor:pointer;transition:background .12s,color .12s}
+.am-zoom button:hover{background:rgba(var(--w),.1);color:var(--fg)}
+.am-zoom button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.am-zoom .zv{min-width:44px;text-align:center;color:var(--fg);font-variant-numeric:tabular-nums}
+.am-zoom .vr{width:1px;height:20px;background:var(--ln);margin:0 4px}
+#setTop.on,#setSide.on{color:var(--fg)}
+.tab-menu.ctx{min-width:240px;z-index:175}
+.tab-menu.ctx.on{animation:amIn .16s var(--ease)}
+.tab-menu.ctx .kb{margin-left:auto;padding-left:20px;color:var(--mute);font-size:11.5px}
+.tab-menu-item[disabled]{opacity:.38;pointer-events:none}
+.ctx-sp{width:14px;flex:none}
+
+/* ===== v3: address-bar buttons, extensions, quick tiles, bookmarks bar, downloads ===== */
+#setTop,#bbarToggle{display:none!important}
+.addr .star{margin:0 2px 0 0}
+.addr .star.on{color:var(--ac)}
+.addr .mbtn{flex:none;width:32px;height:24px;margin-right:6px;border-radius:999px;display:grid;place-items:center;color:var(--dim);background:rgba(var(--w),.08);transition:background .15s,color .15s;cursor:pointer;-webkit-app-region:no-drag!important}
+.addr .mbtn:hover,.addr .mbtn.on{background:rgba(var(--w),.16);color:var(--fg)}
+.addr .mbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+#extBtn.on{color:var(--fg);background:rgba(var(--w),.1)}
+
+/* quick links: full icon tiles, title underneath */
+.quick{gap:20px 22px;max-width:640px;margin:0 auto}
+.quick button{flex-direction:column;justify-content:flex-start;width:88px;height:auto!important;padding:0!important;gap:9px;border:0!important;background:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-radius:0!important;color:var(--fg2);font-size:12px;font-weight:500;transition:transform .35s var(--ease),color .2s}
+.quick button .fav{width:62px;height:62px;border-radius:19px;background:rgba(var(--w),.07);border:1px solid rgba(var(--w),.14);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);transition:background .2s,border-color .2s}
+.quick button .fav-img{width:36px;height:36px;border-radius:9px}
+.quick button .fav-char{font-size:24px}
+.quick button .ql{max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quick button:hover{transform:translateY(-3px);color:var(--fg)}
+.quick button:hover .fav{background:rgba(var(--w),.13);border-color:rgba(var(--w),.28)}
+
+/* bookmarks bar: same glass pills as the new tab page */
+.bbar{height:44px;padding:0 14px;gap:8px;background:linear-gradient(180deg,rgba(var(--w),.05),rgba(var(--w),.02))!important;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-bottom:1px solid rgba(var(--w),.1);box-shadow:inset 0 -20px 30px -24px color-mix(in srgb,var(--ac) 40%,transparent)}
+.bbar-item{height:28px;padding:0 13px 0 7px;gap:7px;border-radius:999px;background:rgba(var(--w),.06);border:1px solid rgba(var(--w),.12);color:var(--fg2);font-size:12px;transition:background .2s,border-color .2s,color .2s,transform .3s var(--ease)}
+.bbar-item:hover{background:rgba(var(--w),.12);border-color:rgba(var(--w),.26);color:var(--fg);transform:translateY(-1px)}
+.bbar-item .fav{width:18px;height:18px;border-radius:6px}
+.bbar-item .fav-img{width:13px;height:13px}
+
+/* main menu: flat and calm */
+.app-menu{width:248px;padding:6px;border-radius:16px;background:color-mix(in srgb,var(--b2) 86%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(var(--w),.14);box-shadow:0 18px 44px rgba(0,0,0,.55)}
+.am-i{height:36px;padding:0 12px;border-radius:10px;gap:11px}
+.am-i svg{opacity:.85}
+.am-sep{margin:6px 8px}
+.am-row{padding:0 12px;height:36px}
+.am-h{padding:8px 12px 6px;font-size:12px;font-weight:600;color:var(--mute)}
+.am-tg .amt{margin-left:auto;width:30px;height:18px;border-radius:99px;background:rgba(var(--w),.18);position:relative;transition:background .25s}
+.am-tg .amt::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .3s var(--ease)}
+.am-tg .amt.on{background:var(--ac)}.am-tg .amt.on::after{transform:translateX(12px);background:#0a0a0c}
+.am-empty{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 14px;text-align:center;color:var(--mute);font-size:12px}
+.am-empty svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;opacity:.5;margin-bottom:4px}
+.am-empty b{color:var(--fg);font-size:13px;font-weight:600}
+.ex-ic{flex:none;width:22px;height:22px;border-radius:7px;background:rgba(var(--w),.09);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--fg)}
+.ex-ic svg{width:14px;height:14px}
+
+/* customize: color theme */
+.cpop{max-height:calc(100vh - 150px);overflow-y:auto;scrollbar-width:none}.cpop::-webkit-scrollbar{display:none}.cpop>*{flex:none}
+.cpth{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid rgba(var(--w),.1)}
+.cpth-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cpth-b{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:7px;border-radius:10px;border:1px solid rgba(var(--w),.1);background:rgba(var(--w),.04);color:var(--fg2);font-size:12px;text-align:left;transition:border-color .2s,background .2s}
+.cpth-b:hover{background:rgba(var(--w),.09)}.cpth-b.on{border-color:var(--ac);color:var(--fg)}
+.cpth-b .tsw{flex:none;width:24px;height:24px;border-radius:7px;border:1px solid var(--ln-bright);display:flex;align-items:flex-end;gap:2px;padding:3px;overflow:hidden}
+.cpth-b .tsw i{display:block;width:100%;height:5px;border-radius:2px}
+
+/* downloads popover */
+.dl-pop{width:324px;padding:10px;gap:6px;border-radius:16px;background:color-mix(in srgb,var(--b2) 88%,transparent);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border-color:rgba(var(--w),.14);box-shadow:0 18px 44px rgba(0,0,0,.55)}
+.dl-head{border:0;padding:4px 6px 2px}
+.dl-list{gap:2px;max-height:320px}
+.dx{display:flex;align-items:center;gap:11px;padding:8px;border-radius:11px;cursor:pointer;transition:background .15s}
+.dx:hover,.dr:hover{background:rgba(var(--w),.07)}
+.dx-ic{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(var(--w),.09);font-size:10px;font-weight:700;letter-spacing:.02em;color:var(--fg2)}
+.dx-ic[data-k="PDF"]{background:rgba(255,95,87,.16);color:#ff8a84}.dx-ic[data-k="ZIP"],.dx-ic[data-k="RAR"],.dx-ic[data-k="7Z"]{background:rgba(255,189,46,.16);color:#ffcc66}
+.dx-ic[data-k="EXE"],.dx-ic[data-k="MSI"],.dx-ic[data-k="DMG"]{background:rgba(120,170,255,.18);color:#9cc2ff}.dx-ic[data-k="PNG"],.dx-ic[data-k="JPG"],.dx-ic[data-k="GIF"],.dx-ic[data-k="WEB"]{background:rgba(52,199,89,.16);color:#6fdc8c}
+.dx-t{flex:1;min-width:0}.dx-t b{display:block;font-size:12.5px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dx-t span{display:block;font-size:11px;color:var(--mute);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dx-p{display:block;height:3px;border-radius:2px;background:rgba(var(--w),.1);margin-top:5px;overflow:hidden}.dx-p u{display:block;height:100%;background:var(--ac);transition:width .25s}
+.dx-a{display:flex;gap:2px;opacity:0;transition:opacity .15s}.dx:hover .dx-a,.dr:hover .dx-a{opacity:1}
+.dx-a button{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:var(--mute);transition:background .15s,color .15s}
+.dx-a button:hover{background:rgba(var(--w),.12);color:var(--fg)}
+.dx-a svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.dl-all{display:flex;align-items:center;justify-content:center;gap:6px;height:34px;margin-top:4px;border-radius:10px;color:var(--fg2);font-size:12px;font-weight:600;background:rgba(var(--w),.06);transition:background .15s,color .15s}
+.dl-all:hover{background:rgba(var(--w),.12);color:var(--fg)}.dl-all svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* false://download */
+.dpg{display:flex;flex-direction:column;gap:14px;margin-top:6px}
+.dpg-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.dpg-s{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:999px;background:rgba(var(--w),.06);border:1px solid rgba(var(--w),.12);color:var(--mute)}
+.dpg-s svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.dpg-s input{flex:1;background:none;border:0;outline:0;color:var(--fg);font:inherit;font-size:13px}
+.dpg-f{display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(var(--w),.06)}
+.dpg-f button{padding:5px 13px;border-radius:999px;font-size:12px;color:var(--fg2);transition:background .2s,color .2s}.dpg-f button.on{background:rgba(var(--w),.16);color:var(--fg)}
+.dpg-a{display:flex;gap:6px}.dpg-b{height:34px;padding:0 14px;border-radius:999px;font-size:12px;font-weight:500;color:var(--fg2);background:rgba(var(--w),.06);border:1px solid rgba(var(--w),.1);transition:background .15s,color .15s}.dpg-b:hover{background:rgba(var(--w),.12);color:var(--fg)}
+.dpg-g{margin:10px 4px 2px;font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--mute);text-transform:uppercase}
+.dr{display:flex;align-items:center;gap:13px;padding:10px;border-radius:12px;cursor:pointer;transition:background .15s}
+.dr .dx-ic{width:40px;height:40px}.dr .dx-t b{font-size:13.5px}.dr .dx-t span{font-size:12px}
+.dpg-empty{display:flex;flex-direction:column;align-items:center;gap:6px;padding:60px 16px;color:var(--mute);text-align:center}
+.dpg-empty svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:1.5;opacity:.45}.dpg-empty b{color:var(--fg);font-size:14px}
+
+/* ===== v4: address bar without search icon, menu button in top bar ===== */
+.addr .sec:not(.lock):not(.warn){display:none}
+.addr .star{margin-left:4px}
+#menuBtn.on{color:var(--fg);background:rgba(var(--w),.1)}
+
+/* ===== v4: false://settings revamp ===== */
+.pg.set .pbody{background:radial-gradient(900px 420px at 68% -90px,rgba(var(--ar),.13),transparent 70%)}
+.pg.set .phead{height:76px;border-bottom:0;background:color-mix(in srgb,var(--bg) 72%,transparent)}
+.pg.set .ptitle{font-size:21px;font-weight:700;letter-spacing:-.035em}
+.pg.set .ptitle i{display:none}
+.pg.set .psearch input{height:40px;border-radius:999px;background:rgba(var(--w),.06);border:1px solid rgba(var(--w),.12);padding-left:40px}
+.pg.set .psearch input:focus{background:rgba(var(--w),.09);border-color:rgba(var(--w),.3)}
+.pg.set .sp{max-width:780px;gap:24px;padding:10px 44px 120px}
+.pg.set .pnav{padding:24px 14px;background:transparent;border-right:1px solid rgba(var(--w),.07)}
+.pg.set .pl{height:38px;padding:0 12px;border-radius:12px}
+.pg.set .pl.on{background:rgba(var(--w),.09)}
+.pg.set .pl.on::after{display:none}
+.pg.set .pidx{margin:2px 0 10px 22px;border-left:1px solid rgba(var(--w),.08)}
+.pg.set .pls{padding:5px 8px 5px 14px}
+.pg.set .pls span{display:none}
+.psec{background:rgba(var(--w),.035);border:1px solid rgba(var(--w),.09);border-radius:20px}
+.psh{padding:20px 24px 10px;background:none}
+.psh i,.psh em{display:none}
+.psh h2{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.psec .sr{padding:16px 24px;border-top:1px solid rgba(var(--w),.07)}
+.psec .sr::before{display:none}
+.psec .sr:hover{background:rgba(var(--w),.03)}
+.psec .sl{font-weight:600}
+.psec .sl span{margin-top:3px;line-height:1.45}
+.psec .tg2{width:42px;height:26px;border-radius:999px;background:rgba(var(--w),.16);box-shadow:none}
+.psec .tg2::after{top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+.psec .tg2[aria-checked=true]{background:var(--ac)}
+.psec .tg2[aria-checked=true]::after{transform:translateX(16px);background:#0a0a0c}
+.psec .sg{border-radius:999px;background:rgba(var(--w),.06);box-shadow:none;padding:3px}
+.psec .sg button{border-radius:999px}
+.psec .opt{border-radius:14px;background:rgba(var(--w),.04);border:1px solid rgba(var(--w),.1)}
+.psec .opt:hover{background:rgba(var(--w),.08)}
+.psec .opt.on{border-color:var(--ac)}
+.psec .keys{padding:16px 24px}
 </style>
 </head>
 <body>
@@ -809,9 +969,10 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
   </div>
   <div class="addr" id="addr" data-tauri-drag-region="false">
     <button class="sec" id="sec" aria-label="Site security" title="Site security & permissions" data-tauri-drag-region="false"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+    <button class="star" id="star" aria-label="Bookmark this tab" title="Bookmark this tab (Ctrl+D)" data-tauri-drag-region="false"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
     <input id="omni" placeholder="Search or enter address" autocomplete="off" spellcheck="false" data-tauri-drag-region="false">
     <button class="reader-btn" id="readerBtn" aria-label="Reader view" title="Distraction-free Reader view" data-tauri-drag-region="false"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></button>
-    <button class="star" id="star" aria-label="Bookmark this page" title="Bookmark this page (Ctrl+D)" data-tauri-drag-region="false"><svg viewBox="0 0 24 24"><path d="M12 3.6l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.8l5.9-.9z"/></svg></button>
+    
     <div class="omni-pop" id="omni-pop"></div>
     <div class="sec-pop" id="sec-pop"></div>
   </div>
@@ -819,10 +980,12 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
     <button class="zoom-btn" id="zoomIndicator" title="Reset zoom (Ctrl+0)"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6M11 8v6"/></svg><span id="zoomLevel">100%</span></button>
     <button class="ib star-top" id="topStar" aria-label="Bookmark this tab" title="Bookmark this tab (Ctrl+D)"><svg viewBox="0 0 24 24"><path d="M12 3.6l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.8l5.9-.9z"/></svg></button>
     <button class="ib" id="bbarToggle" aria-label="Bookmarks bar" title="Bookmarks bar (Ctrl+Shift+B)"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="ib" id="extBtn" aria-label="Extensions" title="Extensions" aria-haspopup="menu"><svg viewBox="0 0 24 24"><path d="M10 4a2 2 0 1 1 4 0v2h3a1 1 0 0 1 1 1v3h-2a2 2 0 1 0 0 4h2v3a1 1 0 0 1-1 1h-3v-2a2 2 0 1 0-4 0v2H7a1 1 0 0 1-1-1v-3h2a2 2 0 1 0 0-4H6V7a1 1 0 0 1 1-1h3V4z"/></svg></button>
     <button class="ib" id="dlTop" aria-label="Downloads" title="Downloads"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5"/><path d="M5 19h14"/></svg></button>
+    <button class="ib profile-btn" id="profileTop" aria-label="Profiles & Accounts" title="Profiles & Accounts"><span class="profile-avatar-pill" id="topProfileAvatar">P</span></button>
+    <button class="ib" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="menu"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
     <button class="ib" id="historyTop" aria-label="History" title="History (Ctrl+H)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></button>
     <button class="ib" id="setTop" aria-label="Settings" title="Settings (Ctrl+,)"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
-    <button class="ib profile-btn" id="profileTop" aria-label="Profiles & Google Account" title="Profiles & Google Account"><span class="profile-avatar-pill" id="topProfileAvatar">P</span></button>
   </div>
   <div class="load" id="load"><div class="load-beam"></div></div>
 </header>
@@ -839,6 +1002,7 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
   </div>
   <div class="dl-list" id="dlList"></div>
 </div>
+
 <div class="profile-pop" id="profilePop">
   <div class="profile-head">
     <div class="profile-avatar-large" id="popProfileAvatar">P</div>
@@ -1055,7 +1219,7 @@ const WALLPAL={
  slate:{bg:[8,9,12],b3:[27,31,39],b4:[46,52,64],w:'215,225,245',ar:'150,170,200'}};
 const WALLVIDTINT={glacier:'',teal:'hue-rotate(-50deg) saturate(1.1)',dusk:'hue-rotate(68deg) saturate(1.15)',ember:'hue-rotate(168deg) saturate(1.35) brightness(1.06)',slate:'saturate(.1) brightness(1.1)'};
 const wid=()=>({default:'obsidian',aurora:'teal'})[cfg.wall]||cfg.wall||'glacier';
-let cfg={layout:'modern',pattern:true,icons:true,quick:true,theme:'nocturne',restore:true,zoom:1,sleep:true,sleepIdle:5,adblock:true,bbar:true};
+let cfg={layout:'classic',pattern:true,icons:true,quick:true,theme:'nocturne',restore:true,zoom:1,sleep:true,sleepIdle:5,adblock:true,bbar:true};
 try{Object.assign(cfg,JSON.parse(localStorage.getItem('false_cfg')||'{}'))}catch(e){}
 let theme = THEMES[cfg.theme] ? cfg.theme : 'nocturne';
 cfg.theme = theme;
@@ -1622,9 +1786,6 @@ async function hydrateState(){
   const s=await tauriInvoke('load_state');
   if(!s||typeof s!=='object')return;
   bootState=s;
-  if(s.onboarding_done === 'true'){
-    try{localStorage.setItem('false_onboarding_done','true');}catch(e){}
-  }
   const has=k=>{try{return !!localStorage.getItem(k)}catch(e){return false}};
   try{
     if(!has('false_cfg')&&s.cfg)Object.assign(cfg,JSON.parse(s.cfg));
@@ -2547,9 +2708,6 @@ const settingsHTML=()=>`<div class="sp"><h1>Settings</h1>
       <button class="opt" data-v="classic"><svg viewBox="0 0 96 60"><rect x=".5" y=".5" width="95" height="59" rx="5"/><rect x="5" y="5" width="22" height="9" rx="3" class="f"/><rect x="30" y="5" width="22" height="9" rx="3"/><rect x="5" y="18" width="86" height="8" rx="3"/></svg>Classic<span>Tabs along the top</span></button>
     </div></div>
   <h2>Theme</h2>
-  <div class="sr col"><div class="sl">Color theme<span>Shell, floor and accent. Web content is untouched.</span></div>
-    <div class="tones" id="cfgTone">${Object.entries(THEMES).map(([k,t])=>`<button class="tone" data-v="${k}" title="${t.hint}"><span class="sw" style="background:${t.bg}"><i style="background:${t.fg}"></i><i style="background:${t.b3}"></i></span><span class="tx"><b>${t.name}</b><span>${t.hint}</span></span></button>`).join('')}</div>
-  </div>
   ${row('Obsidian floor','The animated 3D floor on the Obsidian background. It only runs while Obsidian is selected.','cfgPat',cfg.pattern)}
   ${row('Bookmarks bar','Quick bookmark strip under the address bar (Ctrl+Shift+B).','cfgBbar',cfg.bbar)}
   ${row('Quick links','Shortcuts on the new tab page.','cfgQuick',cfg.quick)}
@@ -2594,7 +2752,7 @@ const settingsHTML=()=>`<div class="sp"><h1>Settings</h1>
   <div class="sr"><div class="sl">Setup & Onboarding<span>Re-run the welcome onboarding setup to sync accounts or import data.</span></div><button class="opt" id="btnRunOnboarding" style="width:auto;align-items:center;padding:8px 16px"><b>Run Setup…</b></button></div>
   <h2>About & Updates</h2>
   <div class="sr col">
-    <div class="sl">false<span id="appVerLabel">Version 0.1.1 · Developed solely by zaidi</span></div>
+    <div class="sl">false<span id="appVerLabel">Version 0.1.2 · Developed solely by zaidi</span></div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
       <button class="opt" id="btnCheckUpdate" style="width:auto;align-items:center;padding:8px 16px"><b>Check for updates</b></button>
       <button class="opt" id="btnImportFlse" style="width:auto;align-items:center;padding:8px 16px;background:rgba(var(--w),.08);border:1px solid var(--ln-bright)" title="Import a .flse update file to update False"><b>Import .flse update</b></button>
@@ -2616,7 +2774,6 @@ const settingsHTML=()=>`<div class="sp"><h1>Settings</h1>
     </div>
   </div>
   <h2>Advanced</h2>
-  <div class="sr"><div class="sl">Native Browser Engine<span>Test our standalone 100% Rust HTML/CSS layout & rendering core.</span></div><button class="opt on" id="btnOpenEngine" style="width:auto;align-items:center;padding:8px 16px"><b>Open Engine Workbench</b></button></div>
   <div class="sr"><div class="sl">Reset<span>Restore every setting and tone to defaults.</span></div><button class="opt" id="cfgReset" style="width:auto;align-items:center;padding:8px 12px"><b>Reset settings</b></button></div>
 </div>`;
 
@@ -2689,7 +2846,7 @@ function bindSettingsCore(){
   };
   const reset=vc.querySelector('#cfgReset');
   if(reset)reset.onclick=()=>{
-    cfg={layout:'modern',pattern:true,icons:true,quick:true,theme:'nocturne',restore:true,zoom:1,sleep:true,sleepIdle:5,adblock:true,bbar:true};
+    cfg={layout:'classic',pattern:true,icons:true,quick:true,theme:'nocturne',restore:true,zoom:1,sleep:true,sleepIdle:5,adblock:true,bbar:true};
     theme='nocturne';saveCfg();apply();applyCfg();
     tauriInvoke('adblock_set_enabled',{enabled:true});
     renderView();toast('Settings reset');
@@ -2718,7 +2875,7 @@ function bindSettingsCore(){
         if(btnApply)btnApply.dataset.url=res.download_url||'';
       }else{
         if(cardNotice)cardNotice.style.display='none';
-        const msg=(res&&res.error)?res.error:`false is up to date (v${res?res.current_version:'0.1.1'}).`;
+        const msg=(res&&res.error)?res.error:`false is up to date (v${res?res.current_version:'0.1.2'}).`;
         if(txtStatus)txtStatus.textContent=msg;
         toast(msg);
       }
@@ -3167,13 +3324,8 @@ function renderView(){
         <div class="hero-pop" id="hero-pop"></div>
       </div>
       <div class="quick">
-        ${(cfg.quick?SITES:[]).map(([n,h])=>`<button data-h="${h}"><span class="fav">${ico(h,n[0])}</span>${n}</button>`).join('')}
+        ${(cfg.quick?SITES:[]).map(([n,h])=>`<button data-h="${h}" title="${n}"><span class="fav">${ico(h,n[0])}</span><span class="ql">${n}</span></button>`).join('')}
       </div>
-      ${bookmarkCache.length?`<div class="bm-strip" aria-label="Bookmarks">${bookmarkCache.slice(0,8).map(b=>{
-        const d=host(b.url)||'';
-        const label=esc(b.title||d||b.url);
-        return `<button data-bh="${esc(b.url)}" title="${label}"><span class="fav">${ico(d,(label[0]||'?').toUpperCase())}</span><span class="lbl">${label}</span></button>`;
-      }).join('')}</div>`:''}
     </div>
   `;
 
@@ -3435,6 +3587,10 @@ function shortcutFromEvent(e){
   if(e.altKey&&e.key==='Home')return'home';
   if(!(e.ctrlKey||e.metaKey))return null;
   if(e.shiftKey&&k==='delete')return'history';
+  if(e.shiftKey&&k==='n')return'new-private';
+  if(k==='n')return'new-window';
+  if(k==='j')return'downloads';
+  if(k==='p')return'print';
   if(k==='e')return'focus-omni';
   if(k==='tab')return e.shiftKey?'prev-tab':'next-tab';
   if(e.shiftKey&&k==='t')return'reopen';
@@ -3459,6 +3615,10 @@ function shortcutFromEvent(e){
 function handleKey(id){
   if(!id)return;
   const t=cur();
+  if(id==='downloads'){$('#dlTop').click();return}
+  if(id==='new-window')return newWindow(false);
+  if(id==='new-private')return newWindow(true);
+  if(id==='print')return printPage();
   if(id==='new-tab'){addTab();setTimeout(()=>omni.focus(),120);return}
   if(id==='close-tab')return closeTab(active);
   if(id==='reopen'){const c=closed.pop();if(c){startLoading();if(c.page)openPage(c.page);else addTab(c.url,{h:c.h||[c.url],i:Number.isInteger(c.i)?c.i:0,title:c.title,pinned:c.pinned})}return}
@@ -3489,6 +3649,7 @@ addEventListener('keydown',e=>{
   e.preventDefault();
   handleKey(id);
 });
+
 
 
 /* Downloads Manager Controller */
@@ -3651,6 +3812,18 @@ addEventListener('keydown', (e) => {
     e.preventDefault();
     setDownloadsOpen(false);
   }
+  if(e.key === 'Escape'){
+    const pPop = $('#profilePop');
+    if(pPop && pPop.classList.contains('on')){
+      setProfileOpen(false);
+      e.stopPropagation();
+    }
+    const bDrop = $('#profileModalBackdrop');
+    if(bDrop && bDrop.classList.contains('on')){
+      closeProfileModal();
+      e.stopPropagation();
+    }
+  }
 }, true);
 
 /* Reader Mode Controller */
@@ -3694,355 +3867,6 @@ function syncReaderBtn(t){
   readerBtn.classList.toggle('on', !!isWeb);
 }
 
-/* ---------- Profile & Account Controller ---------- */
-let profilesList = [];
-let activeProfileId = 'personal';
-let activeProfileRecord = null;
-let profileModalTargetId = null;
-let profileBusy = false;
-let profileWebviewHidden = false;
-let profileModalSavedCb = null;
-
-async function loadProfiles(){
-  try{
-    const res = await tauriInvoke('profiles_list');
-    if(Array.isArray(res) && res.length) profilesList = res;
-    else profilesList = [{id:'personal', name:'Personal', email:'', avatar:'', color:'#3b82f6', created_at: Date.now()}];
-  }catch(e){
-    profilesList = [{id:'personal', name:'Personal', email:'', avatar:'', color:'#3b82f6', created_at: Date.now()}];
-  }
-
-  try{
-    activeProfileId = (await tauriInvoke('profile_get_active')) || 'personal';
-  }catch(e){
-    activeProfileId = 'personal';
-  }
-
-  activeProfileRecord = profilesList.find(p => p.id === activeProfileId) || profilesList[0];
-  renderProfileBadge();
-  renderProfilePop();
-}
-
-function renderProfileBadge(){
-  const avatarEl = $('#topProfileAvatar');
-  if(!avatarEl || !activeProfileRecord) return;
-  const col = activeProfileRecord.color || '#3b82f6';
-  avatarEl.style.setProperty('--profile-color', col);
-  avatarEl.style.backgroundColor = col;
-  if(activeProfileRecord.avatar && activeProfileRecord.avatar.startsWith('http')){
-    avatarEl.style.backgroundImage = `url("${activeProfileRecord.avatar}")`;
-    avatarEl.textContent = '';
-  } else {
-    avatarEl.style.backgroundImage = '';
-    avatarEl.textContent = (activeProfileRecord.name || 'P').trim().charAt(0).toUpperCase();
-  }
-}
-
-function positionProfilePop(){
-  const pop = $('#profilePop');
-  if(!pop) return;
-  const top = document.querySelector('.top');
-  const bbar = $('#bbar');
-  const topBottom = top ? top.getBoundingClientRect().bottom : 52;
-  const barBottom = (bbar && bbar.classList.contains('on'))
-    ? bbar.getBoundingClientRect().bottom
-    : topBottom;
-  pop.style.top = Math.max(56, Math.min(barBottom + 4, innerHeight - 140)) + 'px';
-  pop.style.right = '12px';
-}
-
-function renderProfilePop(){
-  const pop = $('#profilePop');
-  if(!pop || !activeProfileRecord) return;
-  const col = activeProfileRecord.color || '#3b82f6';
-
-  const popAvatar = $('#popProfileAvatar');
-  if(popAvatar){
-    popAvatar.style.setProperty('--profile-color', col);
-    popAvatar.style.backgroundColor = col;
-    if(activeProfileRecord.avatar && activeProfileRecord.avatar.startsWith('http')){
-      popAvatar.style.backgroundImage = `url("${activeProfileRecord.avatar}")`;
-      popAvatar.textContent = '';
-    } else {
-      popAvatar.style.backgroundImage = '';
-      popAvatar.textContent = (activeProfileRecord.name || 'P').trim().charAt(0).toUpperCase();
-    }
-  }
-
-  const nameEl = $('#popProfileName');
-  if(nameEl) nameEl.textContent = activeProfileRecord.name || 'Personal';
-
-  const emailEl = $('#popProfileEmail');
-  if(emailEl){
-    if(activeProfileRecord.email){
-      emailEl.innerHTML = `<span style="color:#10b981">&#x2713;</span> ${esc(activeProfileRecord.email)}`;
-    } else {
-      emailEl.textContent = 'Local Profile \u2022 Not synced';
-    }
-  }
-
-  const btnLabel = $('#popGoogleBtnLabel');
-  if(btnLabel){
-    btnLabel.textContent = activeProfileRecord.email ? 'Manage Google Account' : 'Connect Google Account';
-  }
-
-  const listEl = $('#profileList');
-  if(listEl){
-    listEl.innerHTML = profilesList.map(p => {
-      const isActive = p.id === activeProfileId;
-      const pColor = p.color || '#3b82f6';
-      return `
-        <div class="profile-item${isActive ? ' active' : ''}" data-pid="${esc(p.id)}">
-          <div class="profile-item-dot" style="background:${pColor}"></div>
-          <div class="profile-item-info">
-            <div class="profile-item-name">${esc(p.name)}</div>
-            <div class="profile-item-email">${esc(p.email || 'Local space')}</div>
-          </div>
-          <svg class="profile-item-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-        </div>
-      `;
-    }).join('');
-
-    listEl.querySelectorAll('.profile-item').forEach(item => {
-      item.onclick = async () => {
-        const pid = item.dataset.pid;
-        if(pid && pid !== activeProfileId){
-          await switchProfile(pid);
-        }
-      };
-    });
-  }
-}
-
-async function switchProfile(pid){
-  activeProfileId = pid;
-  try{
-    await tauriInvoke('profile_set_active', { id: pid });
-  }catch(e){}
-  await loadProfiles();
-  await refreshBookmarks();
-  await refreshHistory();
-  setProfileOpen(false);
-  toast(`Switched to ${activeProfileRecord.name}`);
-}
-
-async function setProfileOpen(open){
-  const pop = $('#profilePop');
-  const btn = $('#profileTop');
-  if(!pop || profileBusy) return;
-  const isOpen = pop.classList.contains('on');
-  if(open === isOpen) return;
-  profileBusy = true;
-  try{
-    if(open){
-      if(typeof setDownloadsOpen === 'function') setDownloadsOpen(false);
-      renderProfilePop();
-      positionProfilePop();
-      await freezePageForPopover();
-      if(!profileWebviewHidden){
-        profileWebviewHidden = true;
-        await tauriInvoke('hide_webviews').catch(()=>{});
-      }
-      pop.classList.add('on');
-      if(btn){ btn.classList.add('on'); btn.setAttribute('aria-expanded','true'); }
-    } else {
-      pop.classList.remove('on');
-      if(btn){ btn.classList.remove('on'); btn.setAttribute('aria-expanded','false'); }
-      if(profileWebviewHidden){
-        profileWebviewHidden = false;
-        const t = cur();
-        if(!omniEditing && t && t.url && !t.page && !t.sleeping){
-          await tauriInvoke('show_webview',{
-            tabId:t.id,url:t.url,bounds:getWebBounds(),force:false,
-            background:THEMES[theme].bg
-          }).catch(()=>{});
-        }
-      }
-      clearPageSnapshot();
-    }
-  } finally {
-    profileBusy = false;
-  }
-}
-
-function openProfileModal(pid, isGoogle = false, onSaved = null){
-  const backdrop = $('#profileModalBackdrop');
-  if(!backdrop) return;
-  profileModalTargetId = pid || null;
-  profileModalSavedCb = onSaved;
-  const p = profilesList.find(x => x.id === pid) || {
-    id: 'profile_' + Date.now().toString(36),
-    name: isGoogle ? 'Google Account' : '',
-    email: '',
-    avatar: '',
-    color: '#3b82f6',
-    created_at: Math.floor(Date.now() / 1000)
-  };
-
-  const titleEl = $('#profileModalTitle');
-  if(titleEl) titleEl.textContent = isGoogle ? 'Connect Google Account' : (pid ? 'Edit Profile' : 'Add New Profile');
-
-  const nameInput = $('#profileNameInput');
-  if(nameInput) {
-    nameInput.value = p.name || '';
-    if(!isGoogle) setTimeout(() => nameInput.focus(), 50);
-  }
-
-  const emailInput = $('#profileEmailInput');
-  if(emailInput) {
-    emailInput.value = p.email || '';
-    if(isGoogle) setTimeout(() => emailInput.focus(), 50);
-  }
-
-  const avatarInput = $('#profileAvatarInput');
-  if(avatarInput) avatarInput.value = p.avatar || '';
-
-  const colorDots = document.querySelectorAll('#profileColorPicker .color-dot');
-  colorDots.forEach(d => {
-    d.classList.toggle('on', d.dataset.color === (p.color || '#3b82f6'));
-  });
-
-  const delBtn = $('#profileModalDelete');
-  if(delBtn){
-    delBtn.style.display = (pid && pid !== 'personal') ? 'block' : 'none';
-  }
-
-  backdrop.classList.add('on');
-}
-
-function closeProfileModal(){
-  const backdrop = $('#profileModalBackdrop');
-  if(backdrop) backdrop.classList.remove('on');
-  profileModalTargetId = null;
-  profileModalSavedCb = null;
-}
-
-// Wire up Profile event handlers
-const pBtnEl = $('#profileTop');
-if(pBtnEl){
-  pBtnEl.setAttribute('aria-haspopup','dialog');
-  pBtnEl.setAttribute('aria-expanded','false');
-  pBtnEl.onclick = (e) => {
-    e.stopPropagation();
-    const pop = $('#profilePop');
-    setProfileOpen(!pop.classList.contains('on'));
-  };
-}
-
-const popBtnGoogle = $('#popBtnGoogle');
-if(popBtnGoogle){
-  popBtnGoogle.onclick = () => {
-    setProfileOpen(false);
-    openProfileModal(activeProfileId, true);
-  };
-}
-
-const btnNewProfile = $('#btnNewProfile');
-if(btnNewProfile){
-  btnNewProfile.onclick = () => {
-    setProfileOpen(false);
-    openProfileModal(null, false);
-  };
-}
-
-const btnEditProfile = $('#btnEditProfile');
-if(btnEditProfile){
-  btnEditProfile.onclick = () => {
-    setProfileOpen(false);
-    openProfileModal(activeProfileId, false);
-  };
-}
-
-const pModalClose = $('#profileModalClose');
-if(pModalClose) pModalClose.onclick = closeProfileModal;
-
-const pModalCancel = $('#profileModalCancel');
-if(pModalCancel) pModalCancel.onclick = closeProfileModal;
-
-const pColorPicker = $('#profileColorPicker');
-if(pColorPicker){
-  pColorPicker.querySelectorAll('.color-dot').forEach(dot => {
-    dot.onclick = () => {
-      pColorPicker.querySelectorAll('.color-dot').forEach(d => d.classList.remove('on'));
-      dot.classList.add('on');
-    };
-  });
-}
-
-const pModalSave = $('#profileModalSave');
-if(pModalSave){
-  pModalSave.onclick = async () => {
-    const nameInput = $('#profileNameInput');
-    const emailInput = $('#profileEmailInput');
-    const avatarInput = $('#profileAvatarInput');
-    const selColorDot = $('#profileColorPicker .color-dot.on');
-
-    const name = nameInput ? nameInput.value.trim() : '';
-    const email = emailInput ? emailInput.value.trim() : '';
-    let avatar = avatarInput ? avatarInput.value.trim() : '';
-    const color = selColorDot ? selColorDot.dataset.color : '#3b82f6';
-
-    if(!name && !email){
-      toast('Please enter a profile name or email');
-      return;
-    }
-
-    if(!avatar && email.includes('@')){
-      avatar = `https://unavatar.io/${encodeURIComponent(email)}?fallback=false`;
-    }
-
-    const isNew = !profileModalTargetId;
-    const id = profileModalTargetId || ('prof_' + Date.now().toString(36));
-    const finalName = name || (email ? email.split('@')[0] : 'Profile');
-
-    const pRecord = {
-      id,
-      name: finalName,
-      email,
-      avatar,
-      color,
-      created_at: Math.floor(Date.now() / 1000)
-    };
-
-    try{
-      await tauriInvoke('profile_save', { profile: pRecord });
-      if(isNew){
-        await switchProfile(id);
-      } else {
-        await loadProfiles();
-      }
-      toast(isNew ? `Profile "${finalName}" created!` : `Profile "${finalName}" updated!`);
-      if(typeof profileModalSavedCb === 'function'){
-        profileModalSavedCb();
-      }
-    }catch(err){
-      toast('Error saving profile: ' + String(err));
-    }
-    closeProfileModal();
-  };
-}
-
-const pModalDel = $('#profileModalDelete');
-if(pModalDel){
-  pModalDel.onclick = async () => {
-    if(!profileModalTargetId || profileModalTargetId === 'personal') return;
-    try{
-      await tauriInvoke('profile_delete', { id: profileModalTargetId });
-      if(activeProfileId === profileModalTargetId){
-        await switchProfile('personal');
-      } else {
-        await loadProfiles();
-      }
-      toast('Profile deleted');
-    }catch(err){
-      toast('Error deleting profile: ' + String(err));
-    }
-    closeProfileModal();
-  };
-}
-
-addEventListener('resize', positionProfilePop);
-
 /* Close floating popovers on outside click */
 addEventListener('pointerdown', e => {
   const btn = $('#dlTop');
@@ -4057,21 +3881,6 @@ addEventListener('pointerdown', e => {
     setProfileOpen(false);
   }
 });
-
-addEventListener('keydown', (e) => {
-  if(e.key === 'Escape'){
-    const pPop = $('#profilePop');
-    if(pPop && pPop.classList.contains('on')){
-      e.preventDefault();
-      setProfileOpen(false);
-    }
-    const bDrop = $('#profileModalBackdrop');
-    if(bDrop && bDrop.classList.contains('on')){
-      e.preventDefault();
-      closeProfileModal();
-    }
-  }
-}, true);
 
 document.querySelectorAll('.logo').forEach(i=>i.src=LOGO);
 {const fl=document.createElement('link');fl.rel='icon';fl.href=LOGO;document.head.appendChild(fl)}
@@ -4222,9 +4031,7 @@ function dismissOnboarding() {
   try {
     localStorage.setItem('false_onboarding_done', 'true');
   } catch(e) {}
-  try {
-    tauriInvoke('save_state', { key: 'onboarding_done', value: 'true' });
-  } catch(e) {}
+  try { tauriInvoke('save_state', { key: 'onboarding_done', value: 'true' }); } catch(e) {}
   if (bootState) bootState.onboarding_done = 'true';
   const stage = document.getElementById('onbStage');
   const panel = document.getElementById('onbPanel');
@@ -4373,9 +4180,7 @@ function setupOnboardingEvents() {
   const btnGoogle = document.getElementById('onbBtnGoogle');
   if (btnGoogle) {
     btnGoogle.onclick = () => {
-      openProfileModal(activeProfileId, true, () => {
-        goToOnbStep(1);
-      });
+      openProfileModal(activeProfileId, true, () => { goToOnbStep(1); });
     };
   }
 
@@ -4434,6 +4239,339 @@ async function boot(){
   if(!onbDone) showOnboarding(true);
 }
 boot();
+
+/* =========================================================================
+   Main menu (replaces the old Settings button) + right-click menus
+   ========================================================================= */
+(()=>{
+const S=(p,a='')=>`<svg viewBox="0 0 24 24"${a}>${p}</svg>`;
+const IC={
+  newtab:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 9v6M9 12h6"/>',
+  win:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 9.500h18"/>',
+  priv:'<path d="M3 11h18M6 11c0-4 3-6.5 6-6.500s6 2.5 6 6.500M6.5 14.500a2.2 2.2 0 1 0 4.4 0M13.1 14.500a2.2 2.2 0 1 0 4.4 0"/>',
+  layout:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16"/>',
+  hist:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+  bm:'<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+  dl:'<path d="M12 3v12M7 11l5 5 5-5M5 19h14"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  zoom:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.350-4.350M8 11h6M11 8v6"/>',
+  full:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  print:'<path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="7" y="14" width="10" height="7"/>',
+  find:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  tools:'<path d="M14.7 6.300a4 4 0 0 0-5.4 5.400L3 18v3h3l6.3-6.300a4 4 0 0 0 5.4-5.400l-2.5 2.5-2.2-.6-.6-2.200z"/>',
+  gear:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+  exit:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+  reader:'<path d="M4 19.500A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.500A2.5 2.5 0 0 1 4 19.500v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+  dev:'<path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/>',
+  moon:'<path d="M21 12.790A9 9 0 1 1 11.210 3 7 7 0 0 0 21 12.790z"/>',
+  cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
+  chev:'<path d="M9 6l6 6-6 6"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.540.540l3-3a5 5 0 0 0-7.070-7.070l-1.720 1.710"/><path d="M14 11a5 5 0 0 0-7.540-.540l-3 3a5 5 0 0 0 7.070 7.070l1.710-1.710"/>',
+  img:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="1.6"/><path d="M21 15l-5-5L5 21"/>',
+  back:'<path d="M19 12H5M12 5l-7 7 7 7"/>',
+  fwd:'<path d="M5 12h14M12 5l7 7-7 7"/>',
+  reload:'<path d="M20 12a8 8 0 1 1-2.6-5.900M20 4v5h-5"/>',
+  copy:'<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  cut:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.900M14.5 14.500L20 20M8.1 8.100L12 12"/>',
+  paste:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/>',
+  sel:'<rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="3 3"/>',
+  star:'<path d="M12 3.600l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.800L3.5 9.800l5.9-.9z"/>',
+  open:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  x:'<path d="M18 6L6 18M6 6l12 12"/>',
+  undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+  puzzle:'<path d="M10 4a2 2 0 1 1 4 0v2h3a1 1 0 0 1 1 1v3h-2a2 2 0 1 0 0 4h2v3a1 1 0 0 1-1 1h-3v-2a2 2 0 1 0-4 0v2H7a1 1 0 0 1-1-1v-3h2a2 2 0 1 0 0-4H6V7a1 1 0 0 1 1-1h3V4z"/>',
+  menu:'<circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/>'
+};
+
+/* ---- toolbar button: Settings -> Menu ---- */
+const menuBtn=$('#menuBtn'),setSide=$('#setSide');
+if(setSide){setSide.innerHTML=S(IC.menu,' fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"')+'Menu';setSide.setAttribute('aria-haspopup','menu')}
+
+/* ---- containers ---- */
+const appM=document.createElement('div');appM.className='app-menu';appM.id='app-menu';appM.setAttribute('role','menu');
+const ctxM=document.createElement('div');ctxM.className='tab-menu ctx';ctxM.id='ctx-menu';ctxM.setAttribute('role','menu');
+document.body.append(appM,ctxM);
+
+/* ---- keep native page view out of the way while a menu is open ---- */
+let hid=false,ctxBusy=false;
+async function hideWeb(){
+  if(hid)return;const t=cur();
+  if(!t||!t.url||t.page||t.sleeping)return;
+  hid=true;await freezePageForPopover();await tauriInvoke('hide_webviews').catch(()=>{});
+}
+async function showWeb(){
+  if(!hid)return;hid=false;const t=cur();
+  if(typeof omniEditing==='undefined'||!omniEditing){
+    if(t&&t.url&&!t.page&&!t.sleeping)await tauriInvoke('show_webview',{tabId:t.id,url:t.url,bounds:getWebBounds(),force:false,background:THEMES[theme].bg}).catch(()=>{});
+  }
+  clearPageSnapshot();
+}
+async function closeMenus(){
+  setProfileOpen(false);
+  const was=appM.classList.contains('on')||ctxM.classList.contains('on');
+  appM.classList.remove('on');ctxM.classList.remove('on');ctxBusy=false;
+  [menuBtn,$('#extBtn'),setSide].forEach(b=>b&&b.classList.remove('on'));
+  if(was||hid)await showWeb();
+}
+
+/* ---- helpers (use backend commands when present; the rest degrade gracefully) ---- */
+async function tryInvoke(cmd,args){
+  try{const i=(window.__TAURI__&&window.__TAURI__.core&&window.__TAURI__.core.invoke)||(window.__TAURI_INTERNALS__&&window.__TAURI_INTERNALS__.invoke);
+    if(!i)return false;await i(cmd,args);return true}catch(e){return false}
+}
+/* TODO(rust): add a `new_window` command: { private: bool, url: string } */
+window.newWindow=async(priv,url)=>{if(!await tryInvoke('new_window',{private:!!priv,url:url||''}))toast('New windows are not available yet')};
+const evalPage=(t,script)=>tauriInvoke('eval_page',{tabId:t.id,script});
+window.printPage=()=>{const t=cur();if(t&&t.url&&!t.page&&!t.sleeping)evalPage(t,'window.print()');else window.print()};
+const copy=(txt,msg)=>copyText(txt).then(()=>toast(msg||'Copied'));
+const isWebTab=t=>!!(t&&t.url&&!t.page&&!t.sleeping);
+
+/* =========================== MAIN MENU =========================== */
+function buildApp(){
+  const t=cur(),z=Math.round((cfg.zoom||1)*100);
+  const I=(ic,l,a,off)=>`<button class="am-i" role="menuitem" data-a="${a}"${off?' disabled':''}>${S(IC[ic])}<span>${l}</span></button>`;
+  const sep='<div class="am-sep"></div>';
+  return [
+    I('newtab','New tab','newtab'),I('win','New window','newwin'),I('priv','New private window','private'),sep,
+    I('hist','History','history'),I('bm','Bookmarks','bm-manage'),I('dl','Downloads','downloads'),I('gear','Profiles & Accounts','profiles'),
+    `<button class="am-i am-tg" role="menuitemcheckbox" aria-checked="${!!cfg.bbar}" data-a="bm-bar">${S(IC.bm)}<span>Bookmarks bar</span><i class="amt${cfg.bbar?' on':''}"></i></button>`,sep,
+    `<div class="am-row am-zoom">${S(IC.zoom)}<span class="grow">Zoom</span><button data-z="-" aria-label="Zoom out">−</button><span class="zv" id="amZoom">${z}%</span><button data-z="+" aria-label="Zoom in">+</button></div>`,sep,
+    I('print','Print…','print'),I('find','Find in page','find',!isWebTab(t)),sep,
+    I('gear','Settings','settings'),I('exit','Exit','exit')
+  ].join('');
+}
+function buildExt(){
+  const L=window.falseExtensions||[];
+  const rows=L.length?L.map((x,i)=>`<button class="am-i" role="menuitem" data-x="${i}"><span class="ex-ic">${x.icon?S(x.icon):esc((x.name||'?')[0])}</span><span>${esc(x.name||'Extension')}</span></button>`).join('')
+    :`<div class="am-empty">${S(IC.puzzle)}<b>No extensions yet</b><span>Extensions you add will show up here.</span></div>`;
+  return `<div class="am-h">Extensions</div>${rows}<div class="am-sep"></div><button class="am-i" role="menuitem" data-a="settings">${S(IC.gear)}<span>Manage extensions</span></button>`;
+}
+const RUN={
+  newtab:()=>{addTab();setTimeout(()=>omni.focus(),120)},
+  newwin:()=>newWindow(false),private:()=>newWindow(true),
+  history:()=>openHistory(),'bm-manage':()=>openBookmarks(),profiles:()=>setProfileOpen(true),
+  downloads:()=>$('#dlTop').click(),print:()=>printPage(),find:()=>toggleFindBar(true),
+  settings:()=>openSettings(),exit:()=>$('#wClose').click()
+};
+async function openApp(anchor,build=buildApp){
+  if(appM.classList.contains('on'))return closeMenus();
+  ctxM.classList.remove('on');
+  appM.innerHTML=build();
+  await hideWeb();
+  const r=anchor.getBoundingClientRect();
+  appM.style.cssText='';
+  if(anchor===setSide){appM.style.left=(r.right+8)+'px';appM.style.bottom=Math.max(8,innerHeight-r.bottom)+'px';appM.style.maxHeight=(r.bottom-8)+'px';appM.style.transformOrigin='bottom left'}
+  else if(r.left<innerWidth/2){appM.style.left=Math.max(8,r.left-4)+'px';appM.style.top=(r.bottom+10)+'px';appM.style.maxHeight=(innerHeight-r.bottom-22)+'px';appM.style.transformOrigin='top left'}
+  else{appM.style.right=Math.max(8,innerWidth-r.right)+'px';appM.style.top=(r.bottom+10)+'px';appM.style.maxHeight=(innerHeight-r.bottom-22)+'px';appM.style.transformOrigin='top right'}
+  appM.classList.add('on');anchor.classList.add('on');
+}
+appM.addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b||b.disabled)return;
+  if(b.dataset.z){
+    await setZoom((cfg.zoom||1)+(b.dataset.z==='+'?.1:-.1));const el=$('#amZoom');if(el)el.textContent=Math.round((cfg.zoom||1)*100)+'%';return
+  }
+  if(b.dataset.a==='bm-bar'){
+    $('#bbarToggle').click();const on=!!cfg.bbar;b.setAttribute('aria-checked',on);b.querySelector('.amt').classList.toggle('on',on);return
+  }
+  if(b.dataset.x!==undefined){const x=(window.falseExtensions||[])[+b.dataset.x];await closeMenus();x&&x.onClick&&x.onClick();return}
+  const a=b.dataset.a;await closeMenus();RUN[a]&&RUN[a]();
+});
+[menuBtn,setSide].forEach(b=>b&&(b.onclick=e=>{e.stopPropagation();openApp(b)}));
+const extBtn=$('#extBtn');if(extBtn)extBtn.onclick=e=>{e.stopPropagation();openApp(extBtn,buildExt)};
+
+/* =========================== RIGHT-CLICK =========================== */
+async function showCtx(x,y,items,web){
+  ctxBusy=true;appM.classList.remove('on');
+  ctxM.innerHTML=items.map((it,i)=>it==='-'?'<div class="tab-menu-sep"></div>':
+    `<button class="tab-menu-item" role="menuitem" data-i="${i}"${it.off?' disabled':''}>${it.ic?S(IC[it.ic]):'<span class="ctx-sp"></span>'}<span>${esc(it.l)}</span>${it.kb?`<span class="kb">${it.kb}</span>`:''}</button>`).join('');
+  if(web)await hideWeb();
+  ctxM.style.left='0px';ctxM.style.top='0px';ctxM.classList.add('on');
+  const w=ctxM.offsetWidth,h=ctxM.offsetHeight;
+  ctxM.style.left=Math.max(8,Math.min(innerWidth-w-8,x))+'px';
+  ctxM.style.top=Math.max(8,Math.min(innerHeight-h-8,y))+'px';
+  ctxM._items=items;
+}
+ctxM.addEventListener('click',async e=>{
+  const b=e.target.closest('.tab-menu-item');if(!b||b.disabled)return;
+  const it=ctxM._items[+b.dataset.i];await closeMenus();it&&it.f&&it.f();
+});
+
+/* web page: right-click inside the native page view */
+const q=s=>s.length>26?s.slice(0,26)+'…':s;
+function pageMenu(t,c){
+  const web=$('#web-container').getBoundingClientRect(),z=cfg.zoom||1;
+  const X=web.left+c.x*z,Y=web.top+c.y*z,items=[];
+  const canB=t.i>0,canF=t.i<t.h.length-1,sel=(c.sel||'').trim();
+  if(c.link)items.push({l:'Open link in new tab',ic:'newtab',f:()=>addTab(c.link)},{l:'Copy link address',ic:'link',f:()=>copy(c.link,'Link copied')},'-');
+  if(c.img)items.push({l:'Open image in new tab',ic:'img',f:()=>addTab(c.img)},{l:'Copy image address',ic:'link',f:()=>copy(c.img,'Image address copied')},'-');
+  if(c.edit){
+    items.push(
+      {l:'Cut',ic:'cut',kb:'Ctrl+X',off:!sel,f:async()=>{await copyText(sel);evalPage(t,"document.execCommand('delete')")}},
+      {l:'Copy',ic:'copy',kb:'Ctrl+C',off:!sel,f:()=>copy(sel)},
+      {l:'Paste',ic:'paste',kb:'Ctrl+V',f:async()=>{try{const tx=await navigator.clipboard.readText();evalPage(t,"document.execCommand('insertText',false,"+JSON.stringify(tx)+")")}catch(e){toast('Clipboard unavailable')}}},
+      {l:'Select all',ic:'sel',kb:'Ctrl+A',f:()=>evalPage(t,"document.execCommand('selectAll')")});
+  }else if(sel){
+    items.push({l:'Copy',ic:'copy',kb:'Ctrl+C',f:()=>copy(sel)},
+      {l:`Search ${activeEngine} for “${q(sel)}”`,ic:'find',f:()=>{const u=parseLoc(sel);if(u)addTab(u)}});
+  }else if(!c.link&&!c.img){
+    items.push(
+      {l:'Back',ic:'back',kb:'Alt+←',off:!canB,f:()=>$('#back').click()},
+      {l:'Forward',ic:'fwd',kb:'Alt+→',off:!canF,f:()=>$('#fwd').click()},
+      {l:'Reload',ic:'reload',kb:'Ctrl+R',f:()=>$('#reload').click()},'-',
+      {l:'Bookmark this tab',ic:'star',kb:'Ctrl+D',f:()=>toggleBookmark()},
+      {l:'Copy page link',ic:'link',f:()=>copy(c.url||t.url,'Link copied')},
+      {l:'Print…',ic:'print',kb:'Ctrl+P',f:()=>printPage()},
+      {l:'Select all',ic:'sel',kb:'Ctrl+A',f:()=>evalPage(t,"document.execCommand('selectAll')")});
+  }
+  if(items.length&&items[items.length-1]!=='-')items.push('-');
+  items.push({l:'Inspect',ic:'dev',kb:'F12',f:()=>handleKey('devtools')});
+  showCtx(X,Y,items,true);
+}
+/* The injected script records the right-click on the page; we pick it up here.
+   TODO(rust, optional): emit a `false-ctx` event from the page's init script to skip polling. */
+const CTX_JS=`(function(){try{if(!window.__fcOn){window.__fcOn=1;addEventListener('contextmenu',function(e){if(e.shiftKey)return;var t=e.target,c=function(s){return t.closest?t.closest(s):null},a=c('a[href]'),im=c('img'),ed=c('input,textarea,select,[contenteditable=""],[contenteditable="true"]');e.preventDefault();window.__fcCtx=JSON.stringify({x:e.clientX,y:e.clientY,link:a?a.href:'',img:im?(im.currentSrc||im.src):'',sel:String(getSelection()).slice(0,400),edit:!!ed,url:location.href})},true)}var r=window.__fcCtx||'';window.__fcCtx='';return r}catch(x){return ''}})()`;
+const parse=r=>{let v=r;try{v=JSON.parse(r)}catch(e){}if(typeof v==='string'){try{v=JSON.parse(v)}catch(e){}}return v&&typeof v==='object'?v:null};
+let polling=false;
+setInterval(async()=>{
+  if(polling||ctxBusy||hid||document.hidden)return;
+  const t=cur();if(!isWebTab(t)||!isHttp(t.url))return;
+  polling=true;
+  try{const r=await evalPage(t,CTX_JS);if(typeof r==='string'&&r){const c=parse(r);if(c)pageMenu(t,c)}}catch(e){}
+  polling=false;
+},220);
+(function listen(){
+  if(window.__TAURI__&&window.__TAURI__.event&&window.__TAURI__.event.listen){
+    window.__TAURI__.event.listen('false-ctx',ev=>{const p=ev.payload||{},t=tabById(p.id)||cur();if(isWebTab(t))pageMenu(t,p)});
+  }else setTimeout(listen,300);
+})();
+
+/* browser chrome + internal pages */
+const urlOf=el=>{const n=el.closest('[data-url],[data-u],[data-href],[data-bu],a[href]');if(!n)return '';
+  const v=n.dataset.url||n.dataset.u||n.dataset.href||n.dataset.bu||n.getAttribute('href')||'';return isHttp(v)?v:''};
+document.addEventListener('contextmenu',e=>{
+  const tg=e.target;if(!tg.closest)return;
+  if(tg.closest('input,textarea,[contenteditable="true"]'))return;       // keep native cut/copy/paste in text fields
+  if(tg.closest('#app-menu,#ctx-menu')){e.preventDefault();return}
+  const x=e.clientX,y=e.clientY,t=cur();
+  const bb=tg.closest('.bbar-item');
+  if(bb){
+    e.preventDefault();const u=bb.dataset.bu;
+    showCtx(x,y,[
+      {l:'Open',ic:'open',f:()=>go(u)},{l:'Open in new tab',ic:'newtab',f:()=>addTab(u)},{l:'Copy link address',ic:'link',f:()=>copy(u,'Link copied')},'-',
+      {l:'Delete bookmark',ic:'trash',f:async()=>{await tauriInvoke('bookmark_toggle',{url:u,title:bb.title||u});await refreshBookmarks();toast('Bookmark removed')}}]);
+    return;
+  }
+  if(tg.closest('#vc,.pg')){
+    e.preventDefault();const u=urlOf(tg),items=[];
+    if(u)items.push({l:'Open link in new tab',ic:'newtab',f:()=>addTab(u)},{l:'Copy link address',ic:'link',f:()=>copy(u,'Link copied')},'-');
+    items.push({l:'Back',ic:'back',kb:'Alt+←',off:!(t&&t.i>0),f:()=>$('#back').click()},
+      {l:'Forward',ic:'fwd',kb:'Alt+→',off:!(t&&t.i<t.h.length-1),f:()=>$('#fwd').click()},
+      {l:'Reload',ic:'reload',kb:'Ctrl+R',f:()=>$('#reload').click()});
+    showCtx(x,y,items);return;
+  }
+  if(tg.closest('header,.strip,.tabs-container,#tabs,#tabs-pinned,.side,.bbar,.wc')){
+    e.preventDefault();
+    showCtx(x,y,[
+      {l:'New tab',ic:'newtab',kb:'Ctrl+T',f:()=>handleKey('new-tab')},
+      {l:'Reopen closed tab',ic:'undo',kb:'Ctrl+Shift+T',off:!(typeof closed!=='undefined'&&closed.length),f:()=>handleKey('reopen')},'-',
+      {l:(cfg.bbar?'Hide':'Show')+' bookmarks bar',ic:'bm',kb:'Ctrl+Shift+B',f:()=>$('#bbarToggle').click()},
+      {l:'Downloads',ic:'dl',kb:'Ctrl+J',f:()=>$('#dlTop').click()},
+      {l:'Settings',ic:'gear',kb:'Ctrl+,',f:()=>openSettings()}]);
+  }
+});
+document.addEventListener('mousedown',e=>{
+  if(!appM.classList.contains('on')&&!ctxM.classList.contains('on'))return;
+  if(e.target.closest('#app-menu,#ctx-menu,#menuBtn,#extBtn,#setSide'))return;
+  closeMenus();
+},true);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&(appM.classList.contains('on')||ctxM.classList.contains('on'))){e.stopPropagation();closeMenus()}},true);
+addEventListener('resize',()=>{if(appM.classList.contains('on')||ctxM.classList.contains('on'))closeMenus()});
+
+/* ===================== Extensions registry ===================== */
+window.falseExtensions=window.falseExtensions||[];
+/* False.registerExtension({name:'Notes',icon:'<path d="..."/>',onClick:()=>False.open('notes')}) */
+False.registerExtension=def=>{window.falseExtensions.push(def)};
+
+/* ===================== Color theme lives in Customize now ===================== */
+{const _rc=renderCust;
+renderCust=function(){
+  _rc();const p=$('#cpop');if(!p)return;
+  const box=document.createElement('div');box.className='cpth';
+  box.innerHTML='<h4>Color theme</h4><div class="cpth-g">'+Object.entries(THEMES).map(([k,t])=>`<button class="cpth-b${k===theme?' on':''}" data-t="${k}" title="${esc(t.hint||'')}"><span class="tsw" style="background:${t.bg}"><i style="background:${t.fg}"></i><i style="background:${t.b3}"></i></span><b>${esc(t.name)}</b></button>`).join('')+'</div>';
+  p.appendChild(box);
+  box.querySelectorAll('.cpth-b').forEach(b=>b.onclick=()=>{theme=b.dataset.t;cfg.theme=theme;saveCfg();apply();box.querySelectorAll('.cpth-b').forEach(o=>o.classList.toggle('on',o===b));toast(THEMES[theme].name+' theme')});
+};}
+
+/* ===================== Bookmark button wording ===================== */
+{const _us=updateStar;
+updateStar=function(t){_us(t);const el=$('#star');if(!el)return;const on=el.classList.contains('on');
+  el.title=on?'Bookmarked. Click to remove (Ctrl+D)':'Bookmark this tab (Ctrl+D)';el.setAttribute('aria-label',on?'Remove bookmark':'Bookmark this tab')}}
+if($('#star')){$('#star').setAttribute('aria-label','Bookmark this tab');updateStar()}
+
+/* ===================== Downloads: simpler popover + false://download ===================== */
+const extOf=n=>{const m=/\.([a-z0-9]{1,5})$/i.exec(n||'');return m?m[1].toUpperCase():'FILE'};
+const ago=ts=>{if(!ts)return '';const s=(Date.now()-ts)/1000;if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+' min ago';if(s<86400)return Math.floor(s/3600)+' h ago';return new Date(ts).toLocaleDateString([], {month:'short',day:'numeric'})};
+const dlIcon=d=>`<span class="dx-ic" data-k="${extOf(d.name).slice(0,3)}">${esc(extOf(d.name).slice(0,4))}</span>`;
+const dlMeta=d=>[d.size,d.progress<100?Math.round(d.progress)+'%':'Done',ago(d.time)].filter(Boolean).join(' · ');
+async function revealDl(d){if(d&&d.path&&await tryInvoke('reveal_path',{path:d.path}))return;tauriInvoke('open_downloads_folder').catch(()=>toast('Downloads folder'))}
+const dlAct=(i,d)=>`<span class="dx-a"><button data-do="reveal" data-i="${i}" title="Show in folder" aria-label="Show in folder">${S(IC.open)}</button><button data-do="remove" data-i="${i}" title="Remove from list" aria-label="Remove from list">${S(IC.x)}</button></span>`;
+function dlBind(root){
+  root.onclick=e=>{
+    const b=e.target.closest('[data-do]');
+    if(b){e.stopPropagation();const i=+b.dataset.i,d=downloads[i];
+      if(b.dataset.do==='remove'){downloads.splice(i,1);saveDownloads();renderDownloads()}
+      else revealDl(d);return}
+    const r=e.target.closest('[data-i]');if(r)openDownload(+r.dataset.i);
+  };
+}
+renderDownloads=function(){
+  const list=$('#dlList'),count=$('#dlCount');if(!list)return;
+  const act=downloads.filter(d=>d.progress<100).length;
+  if(count)count.textContent=!downloads.length?'Nothing yet':act?act+' in progress':downloads.length+(downloads.length===1?' file':' files');
+  list.innerHTML=downloads.length?downloads.slice(0,6).map((d,i)=>`<div class="dx" data-i="${i}" role="button" tabindex="0">${dlIcon(d)}<div class="dx-t"><b title="${esc(d.name)}">${esc(d.name)}</b><span>${esc(dlMeta(d))}</span>${d.progress<100?`<i class="dx-p"><u style="width:${d.progress}%"></u></i>`:''}</div>${dlAct(i,d)}</div>`).join('')
+    :`<div class="dl-empty">${S(IC.dl)}<span>Files you download will appear here</span></div>`;
+  dlBind(list);
+  if(window.__dlPageRefresh)window.__dlPageRefresh();
+};
+{const pop=$('#dl-pop');
+ if(pop&&!$('#dlAll')){const f=document.createElement('button');f.id='dlAll';f.className='dl-all';f.innerHTML='All downloads'+S(IC.fwd);f.onclick=async()=>{await setDownloadsOpen(false);openPage('download')};pop.appendChild(f)}}
+renderDownloads();
+
+False.registerPage('download',{
+  title:'Downloads',
+  icon:'<path d="M12 3v12M7 11l5 5 5-5M5 19h14"/>',
+  html:()=>`<h1>Downloads</h1>
+  <div class="dpg">
+    <div class="dpg-bar">
+      <label class="dpg-s">${S(IC.find)}<input id="dq" placeholder="Search downloads" autocomplete="off" spellcheck="false"></label>
+      <div class="dpg-f" id="df"><button data-f="all" class="on">All</button><button data-f="active">In progress</button><button data-f="done">Completed</button></div>
+      <div class="dpg-a"><button class="dpg-b" id="dfolder">Open folder</button><button class="dpg-b" id="dclear">Clear finished</button></div>
+    </div>
+    <div id="dlist"></div>
+  </div>`,
+  bind:()=>{
+    let f='all',q='';
+    const L=$('#dlist');
+    const grp=ts=>{const d=new Date(ts||0),n=new Date(),sd=x=>new Date(x.getFullYear(),x.getMonth(),x.getDate()).getTime(),diff=(sd(n)-sd(d))/864e5;return diff<1?'Today':diff<2?'Yesterday':'Earlier'};
+    const draw=()=>{
+      const L=$('#dlist');if(!L)return;
+      const rows=downloads.map((d,i)=>({d,i})).filter(({d})=>(f==='all'||(f==='active'?d.progress<100:d.progress>=100))&&(!q||(d.name||'').toLowerCase().includes(q)));
+      if(!rows.length){L.innerHTML=`<div class="dpg-empty">${S(IC.dl)}<b>${downloads.length?'No matches':'No downloads yet'}</b><span>${downloads.length?'Try a different search or filter.':'Files you download will show up here.'}</span></div>`;return}
+      let out='',g='';
+      rows.forEach(({d,i})=>{const k=grp(d.time);if(k!==g){g=k;out+=`<h3 class="dpg-g">${k}</h3>`}
+        out+=`<div class="dr" data-i="${i}" role="button" tabindex="0">${dlIcon(d)}<div class="dx-t"><b title="${esc(d.name)}">${esc(d.name)}</b><span>${esc(dlMeta(d))}${d.path?' · '+esc(d.path):''}</span>${d.progress<100?`<i class="dx-p"><u style="width:${d.progress}%"></u></i>`:''}</div>${dlAct(i,d)}</div>`});
+      L.innerHTML=out;dlBind(L);
+    };
+    window.__dlPageRefresh=draw;
+    $('#dq').oninput=e=>{q=e.target.value.trim().toLowerCase();draw()};
+    $('#df').onclick=e=>{const b=e.target.closest('button');if(!b)return;f=b.dataset.f;$('#df').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));draw()};
+    $('#dfolder').onclick=()=>tauriInvoke('open_downloads_folder').catch(()=>toast('Downloads folder'));
+    $('#dclear').onclick=()=>{downloads=downloads.filter(d=>d.progress<100);saveDownloads();renderDownloads();toast('Finished downloads cleared')};
+    draw();
+  }
+});
+
+})();
 })();
 </script>
 <script>/* Glacier background loop: 480x320, 24fps, 17s seamless, interpolated from the uploaded GIF */
