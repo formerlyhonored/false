@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Uninstall false</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--fg:#f4f6fa;--fg2:rgba(244,246,250,.7);--mute:rgba(244,246,250,.44);--edge:rgba(255,255,255,.12);--ln:rgba(255,255,255,.09);--ice:#cfe0ff;--ease:cubic-bezier(.22,1,.36,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:#000;color:var(--fg);user-select:none;-webkit-user-select:none;font-family:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid #bcd3ff;outline-offset:3px;border-radius:.5em}
+
+/* full-screen background: glacier under frosted glass */
+.bg{position:fixed;inset:0;overflow:hidden;background:#050506}
+.bg video{width:100%;height:100%;object-fit:cover;transform:scale(1.1);opacity:0;transition:opacity 2s var(--ease)}
+.bg video.ready{opacity:.95}
+.bg::after{content:"";position:absolute;inset:0;-webkit-backdrop-filter:blur(30px) saturate(1.2);backdrop-filter:blur(30px) saturate(1.2);background:linear-gradient(90deg,rgba(5,5,6,.3),rgba(5,5,6,.62))}
+
+.drag{position:fixed;top:0;left:0;right:0;height:44px;-webkit-app-region:drag;app-region:drag;z-index:5}
+.close{position:fixed;top:14px;right:16px;z-index:6;width:32px;height:32px;border-radius:9px;display:grid;place-items:center;color:var(--mute);-webkit-app-region:no-drag;app-region:no-drag;transition:background .2s,color .2s}
+.close:hover{background:rgba(255,255,255,.1);color:var(--fg)}
+.close svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+
+/* 16:9 frame, scaled to fit the screen; everything inside is in em so it scales with it */
+.stage{position:fixed;inset:0;display:grid;place-items:center}
+.frame{container-type:size;width:min(100vw,177.7778vh);aspect-ratio:16/9;font-size:max(11px,1.05cqw);position:relative;display:grid;grid-template-columns:1.15fr .85fr;
+  opacity:0;filter:blur(10px);animation:fin 1.1s .1s var(--ease) forwards}
+@keyframes fin{to{opacity:1;filter:none}}
+@supports not (container-type:size){.frame{font-size:min(1.05vw,1.867vh)}}
+
+.brand{display:flex;flex-direction:column;justify-content:center;padding:0 7em}
+.brand img{width:6.5em;height:6.5em;filter:drop-shadow(0 0 2em rgba(170,200,255,.4))}
+.brand b{margin-top:.5em;font-size:5em;line-height:1;font-weight:700;letter-spacing:-.05em}
+.brand p{margin-top:.9em;font-size:1.25em;color:var(--fg2);max-width:20em}
+.ver{position:absolute;left:7em;bottom:3em;font-size:.9em;color:var(--mute)}
+
+.side{display:flex;align-items:center;padding:0 5em 0 4.5em;background:rgba(8,10,16,.4);border-left:1px solid var(--edge);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px)}
+.steps{display:grid;width:100%;max-width:27em}
+.step{grid-area:1/1;opacity:0;visibility:hidden;transform:translateX(1.6em);filter:blur(6px);transition:opacity .45s var(--ease),transform .6s var(--ease),filter .45s var(--ease),visibility 0s .6s}
+.step.active{opacity:1;visibility:visible;transform:none;filter:none;transition-delay:.12s,.12s,.12s,0s}
+.step.out{transform:translateX(-1.6em)}
+.step h1{font-size:2.1em;line-height:1.15;font-weight:700;letter-spacing:-.035em}
+.step .sub{margin-top:.6em;font-size:1.05em;color:var(--fg2)}
+.rise{opacity:0;transform:translateY(.7em);transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.active .rise{opacity:1;transform:none;transition-delay:calc(.18s + var(--i,0)*60ms)}
+
+.opts{margin-top:1.8em}
+.opt{display:flex;align-items:center;gap:1.2em;width:100%;padding:1em 0;text-align:left;border-top:1px solid var(--ln)}
+.opts .opt:last-child{border-bottom:1px solid var(--ln)}
+.opt .t{flex:1;min-width:0}.opt .t b{display:block;font-weight:600}.opt .t span{display:block;font-size:.88em;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt .link{font-size:.95em;color:var(--fg2);padding:.3em .7em;border-radius:.6em;transition:background .2s,color .2s}.opt .link:hover{background:rgba(255,255,255,.1);color:var(--fg)}
+button.opt{transition:opacity .2s}button.opt:hover .t b{color:#fff}
+.sw{flex:none;width:2.7em;height:1.55em;border-radius:99px;background:rgba(255,255,255,.18);position:relative;transition:background .3s}
+.sw::after{content:"";position:absolute;top:.25em;left:.25em;width:1.05em;height:1.05em;border-radius:50%;background:#fff;transition:transform .35s var(--ease),background .3s}
+[aria-checked="true"] .sw{background:#9cc2ff}[aria-checked="true"] .sw::after{transform:translateX(1.15em);background:#0a0e16}
+
+.actions{display:flex;gap:.8em;margin-top:2em}
+.btn{flex:1;display:flex;align-items:center;justify-content:center;height:3.3em;border-radius:.95em;font-weight:600;border:1px solid var(--edge);background:rgba(255,255,255,.07);transition:background .2s,transform .2s var(--ease),box-shadow .25s}
+.btn:hover{background:rgba(255,255,255,.14)}.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--fg);color:#0a0e16;border-color:transparent}
+.btn.primary:hover{background:#fff;box-shadow:0 .6em 2em rgba(170,200,255,.28)}
+.btn.danger{background:#ffd9d6;color:#2a0b09;border-color:transparent}.btn.danger:hover{background:#ffe6e3;box-shadow:0 .6em 2em rgba(255,120,110,.25)}
+.btn.grow{flex:2}
+
+.prog{margin-top:2.4em}
+.bar{height:.4em;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#7fa8ee,#e3eeff);transition:width .5s var(--ease);position:relative;overflow:hidden}
+.bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:sh 1.6s linear infinite}
+@keyframes sh{to{transform:translateX(100%)}}
+.stat{display:flex;justify-content:space-between;margin-top:.8em;color:var(--fg2)}
+.stat span:last-child{color:var(--mute);font-variant-numeric:tabular-nums}
+
+.done{display:grid;place-items:center;width:3.6em;height:3.6em;border-radius:50%;margin-bottom:1.3em;background:rgba(207,224,255,.12);border:1px solid rgba(207,224,255,.4)}
+.done svg{width:1.7em;height:1.7em;stroke:var(--ice);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30}
+.active .done svg{stroke-dashoffset:0;transition:stroke-dashoffset .7s var(--ease) .45s}
+
+/* narrow / portrait windows: stack the two halves */
+@media(max-aspect-ratio:1/1){.frame{width:100vw;aspect-ratio:auto;height:100vh;font-size:max(12px,2.6vw);grid-template-columns:1fr;grid-template-rows:auto 1fr}.brand{padding:4em 3em 1em}.brand b{font-size:3.4em}.brand img{width:4em;height:4em}.brand p{display:none}.side{border-left:0;border-top:1px solid var(--edge);padding:2em 3em}.ver{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;transition-delay:0s!important}.frame{opacity:1;filter:none}}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><video id="loop" src="glacier-loop-2.webm" autoplay muted loop playsinline preload="auto"></video></div>
+<div class="drag" data-tauri-drag-region></div>
+<button class="close" id="closeBtn" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+<main class="stage"><div class="frame">
+<div class="brand"><img src="logo-transparent.png" alt=""><b>false</b><p>Sorry to see you go.</p></div>
+<div class="side"><div class="steps">
+
+<!-- 1. Confirm -->
+<div class="step active">
+  <h1 class="rise" style="--i:0">Uninstall false?</h1>
+  <p class="sub rise" style="--i:1">This removes false from your computer. Close the browser first if it's open.</p>
+  <div class="opts rise" style="--i:2">
+    <button class="opt" role="switch" aria-checked="false" id="optData"><div class="t"><b>Also delete my browsing data</b><span>Bookmarks, history, passwords and settings</span></div><i class="sw"></i></button>
+  </div>
+  <div class="actions rise" style="--i:3"><button class="btn" id="cancelBtn">Cancel</button><button class="btn danger grow" id="removeBtn">Uninstall</button></div>
+</div>
+
+<!-- 2. Removing -->
+<div class="step">
+  <h1>Removing false</h1>
+  <p class="sub">Keep this window open. It won't take long.</p>
+  <div class="prog"><div class="bar"><i id="fill"></i></div><div class="stat"><span id="label">Preparing</span><span id="pct">0%</span></div></div>
+</div>
+
+<!-- 3. Done -->
+<div class="step">
+  <div class="done rise" style="--i:0"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h1 class="rise" style="--i:1">false was removed</h1>
+  <p class="sub rise" style="--i:2" id="doneMsg">Thanks for trying it. You can reinstall anytime.</p>
+  <div class="actions rise" style="--i:3"><button class="btn primary" id="doneBtn">Close</button></div>
+</div>
+</div></div>
+<span class="ver">Version 0.1.0</span>
+</div></main>
+<script>
+const tauriInvoke = async (cmd, args = {}) => {
+  try {
+    if (window.__TAURI__?.core?.invoke) return await window.__TAURI__.core.invoke(cmd, args);
+    if (window.__TAURI_INTERNALS__?.invoke) return await window.__TAURI_INTERNALS__.invoke(cmd, args);
+  } catch(e) {
+    console.error('Tauri invoke error:', cmd, e);
+    throw e;
+  }
+};
+
+const dragEl = document.querySelector('.drag');
+if (dragEl) {
+  dragEl.addEventListener('mousedown', () => {
+    try { window.__TAURI__?.window?.getCurrentWindow()?.startDragging?.(); } catch(e) {}
+  });
+}
+
+const v=document.getElementById('loop'),SPEED=.25;           // slow glacier loop
+const setup=()=>{v.playbackRate=SPEED;v.classList.add('ready')};
+v.addEventListener('canplay',setup,{once:true});v.addEventListener('play',()=>v.playbackRate=SPEED);
+v.play().catch(()=>{});if(v.readyState>=3)setup();
+
+const steps=[...document.querySelectorAll('.step')];let cur=0;
+function go(n){steps[cur].classList.remove('active');steps[cur].classList.add('out');cur=n;steps[cur].classList.remove('out');steps[cur].classList.add('active')}
+document.querySelectorAll('[role=switch]').forEach(s=>s.addEventListener('click',()=>s.setAttribute('aria-checked',s.getAttribute('aria-checked')!=='true')));
+const on=id=>document.getElementById(id).getAttribute('aria-checked')==='true';
+
+/* Shared progress UI: hooks call setProgress(0..100, "status text") */
+function setProgress(p,label){document.getElementById('fill').style.width=p+'%';document.getElementById('pct').textContent=Math.round(p)+'%';if(label)document.getElementById('label').textContent=label}
+
+const hooks={
+  uninstall: async(opts)=>{
+    setProgress(20, 'Closing running processes');
+    await new Promise(r => setTimeout(r, 200));
+    setProgress(55, 'Removing application files');
+    await tauriInvoke('uninstaller_run', { deleteData: opts.deleteData });
+    setProgress(85, 'Cleaning shortcuts and registry');
+    await new Promise(r => setTimeout(r, 250));
+    setProgress(100, 'Finishing up');
+  },
+  close: ()=>{
+    try {
+      tauriInvoke('uninstaller_close');
+    } catch(e) {
+      window.close();
+    }
+  },
+};
+document.getElementById('removeBtn').onclick=async()=>{
+  const del=on('optData');
+  document.getElementById('doneMsg').textContent=del?'Your browsing data was deleted too. You can reinstall anytime.':'Your browsing data was kept on this computer. You can reinstall anytime.';
+  go(1);await hooks.uninstall({deleteData:del});await new Promise(r=>setTimeout(r,500));go(2);
+};
+document.getElementById('cancelBtn').onclick=hooks.close;
+document.getElementById('doneBtn').onclick=hooks.close;
+document.getElementById('closeBtn').onclick=hooks.close;
+</script>
+</body>
+</html>

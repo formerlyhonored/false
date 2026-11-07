@@ -1,0 +1,10 @@
+﻿[package]
+name = "false-layout"
+version = "0.1.0"
+edition = "2021"
+authors = ["zaidi"]
+
+[dependencies]
+false-core = { path = "../false-core" }
+false-dom = { path = "../false-dom" }
+false-css = { path = "../false-css" }

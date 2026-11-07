@@ -1,0 +1,14 @@
+[workspace]
+members = [
+    "crates/false-core",
+    "crates/false-net",
+    "crates/false-dom",
+    "crates/false-css",
+    "crates/false-layout",
+    "crates/false-render",
+    "crates/false-engine",
+    "crates/false-ui",
+    "crates/false-installer",
+]
+default-members = ["crates/false-ui"]
+resolver = "2"

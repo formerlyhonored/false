@@ -1,0 +1,13 @@
+﻿[package]
+name = "false-installer"
+version = "0.1.0"
+edition = "2021"
+authors = ["zaidi"]
+description = "Fast, standalone Windows installer for False Browser"
+default-run = "FalseSetup"
+
+[[bin]]
+name = "FalseSetup"
+path = "src/main.rs"
+
+[dependencies]

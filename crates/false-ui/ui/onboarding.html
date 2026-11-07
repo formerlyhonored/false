@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Welcome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --fg:#f4f6fa;--fg2:rgba(244,246,250,.72);--mute:rgba(244,246,250,.5);
+  --glass:rgba(10,14,22,.38);--glass-edge:rgba(255,255,255,.14);
+  --ln:rgba(255,255,255,.12);--hover:rgba(255,255,255,.08);--sel:rgba(170,200,255,.16);--sel-edge:rgba(170,200,255,.55);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#000;color:var(--fg);overflow:hidden;user-select:none;-webkit-user-select:none;
+  font:15px/1.45 "Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible{outline:2px solid #bcd3ff;outline-offset:2px}
+
+/* ---------- Background: glacier loop under frosted glass ---------- */
+.bg{position:fixed;inset:0;overflow:hidden;background:#05070b}
+.bg video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08);opacity:0;transition:opacity 1.6s var(--ease)}
+.bg video.ready{opacity:1}
+.frost{position:absolute;inset:0;
+  -webkit-backdrop-filter:blur(34px) saturate(1.25);backdrop-filter:blur(34px) saturate(1.25);
+  background:linear-gradient(180deg,rgba(6,10,18,.30),rgba(6,10,18,.52))}
+
+/* ---------- Layout ---------- */
+.stage{position:fixed;inset:0;display:grid;place-items:center;padding:max(24px,env(safe-area-inset-top)) 24px max(24px,env(safe-area-inset-bottom))}
+.panel{position:relative;width:min(420px,100%);padding:36px 32px 28px;border-radius:24px;
+  background:var(--glass);border:1px solid var(--glass-edge);
+  -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+  box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);
+  opacity:0;transform:translateY(14px) scale(.985);filter:blur(8px);
+  animation:panelIn 1s .25s var(--ease) forwards;
+  transition:height .55s var(--ease)}
+@keyframes panelIn{to{opacity:1;transform:none;filter:none}}
+.panel.leave{animation:none;opacity:1;transition:opacity .6s var(--ease),transform .6s var(--ease),filter .6s var(--ease);
+  opacity:0;transform:translateY(-10px) scale(1.02);filter:blur(10px)}
+
+.logo{display:block;width:56px;height:56px;margin:0 auto 20px;filter:drop-shadow(0 0 18px rgba(170,200,255,.35))}
+
+/* ---------- Steps ---------- */
+.steps{position:relative;display:grid}
+.step{grid-area:1/1;opacity:0;visibility:hidden;transform:translateX(24px);filter:blur(6px);
+  transition:opacity .45s var(--ease),transform .55s var(--ease),filter .45s var(--ease),visibility 0s .55s}
+.step.active{opacity:1;visibility:visible;transform:none;filter:none;transition-delay:.12s,.12s,.12s,0s}
+.step.out{transform:translateX(-24px)}
+.step h1{font-size:26px;line-height:1.15;font-weight:600;letter-spacing:-.02em;text-align:center}
+.step .sub{margin:10px auto 26px;max-width:320px;text-align:center;color:var(--fg2)}
+
+/* stagger children in on activate */
+.step .rise{opacity:0;transform:translateY(10px);transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.step.active .rise{opacity:1;transform:none;transition-delay:calc(.2s + var(--i,0) * 60ms)}
+
+/* ---------- Buttons ---------- */
+.stack{display:grid;gap:10px}
+.btn{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;height:48px;padding:0 18px;border-radius:14px;
+  font-weight:600;border:1px solid var(--ln);background:rgba(255,255,255,.06);
+  transition:background .2s,transform .2s var(--ease),border-color .2s,box-shadow .2s}
+.btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:19px;height:19px;flex:none}
+.btn.primary{background:#f4f6fa;color:#0a0e16;border-color:transparent}
+.btn.primary:hover{background:#fff;box-shadow:0 8px 28px rgba(170,200,255,.28)}
+.btn.primary[disabled]{opacity:.45;pointer-events:none}
+.text-btn{display:block;margin:16px auto 0;padding:8px 14px;border-radius:10px;color:var(--mute);font-weight:500;transition:color .2s,background .2s}
+.text-btn:hover{color:var(--fg);background:var(--hover)}
+.or{display:flex;align-items:center;gap:12px;margin:18px 0 0;color:var(--mute);font-size:13px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--ln)}
+
+/* ---------- Browser list ---------- */
+.list{display:grid;gap:10px}
+.browser{display:flex;align-items:center;gap:14px;width:100%;padding:12px 14px;border-radius:14px;text-align:left;
+  border:1px solid var(--ln);background:rgba(255,255,255,.05);
+  transition:background .25s,border-color .25s,transform .2s var(--ease)}
+.browser:hover{background:var(--hover)}
+.browser:active{transform:scale(.985)}
+.browser .ico{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.08);font-weight:700}
+.browser .meta{flex:1;min-width:0}
+.browser .name{font-weight:600}
+.browser .hint{font-size:13px;color:var(--mute)}
+.check{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);display:grid;place-items:center;transition:background .25s,border-color .25s,transform .35s var(--ease)}
+.check svg{width:12px;height:12px;stroke:#0a0e16;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .4s var(--ease) .05s}
+.browser[aria-checked="true"]{background:var(--sel);border-color:var(--sel-edge)}
+.browser[aria-checked="true"] .check{background:#cfe0ff;border-color:#cfe0ff;transform:scale(1.08)}
+.browser[aria-checked="true"] .check svg{stroke-dashoffset:0}
+.note{margin-top:14px;text-align:center;font-size:13px;color:var(--mute)}
+
+/* ---------- Progress dots ---------- */
+.dots{display:flex;justify-content:center;gap:6px;margin-top:22px}
+.dots i{width:6px;height:6px;border-radius:99px;background:rgba(255,255,255,.25);transition:width .5s var(--ease),background .4s}
+.dots i.on{width:22px;background:#e6efff}
+
+/* spinner for the importing state */
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(10,14,22,.25);border-top-color:#0a0e16;animation:spin .7s linear infinite;display:none}
+.btn.loading .spin{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;transition-delay:0s!important}
+  .panel{opacity:1;transform:none;filter:none}
+}
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <video id="loop" src="glacier-loop.webm" autoplay muted loop playsinline preload="auto"></video>
+  <div class="frost"></div>
+</div>
+
+<main class="stage">
+  <section class="panel" id="panel" aria-live="polite">
+    <img class="logo" src="logo-transparent.png" alt="">
+
+    <div class="steps">
+      <!-- STEP 1: Sign in -->
+      <div class="step active" data-step="0">
+        <h1 class="rise" style="--i:0">Sign in to sync</h1>
+        <p class="sub rise" style="--i:1">Bring your bookmarks, history and settings to every device.</p>
+        <div class="stack">
+          <button class="btn rise" style="--i:2" data-auth="google">
+            <svg viewBox="0 0 24 24"><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.3 14.6 2.4 12 2.4 6.7 2.4 2.4 6.7 2.4 12s4.3 9.6 9.6 9.6c5.5 0 9.2-3.9 9.2-9.4 0-.6-.1-1.1-.2-1.6H12z"/></svg>
+            Continue with Google
+          </button>
+          <button class="btn rise" style="--i:3" data-auth="apple">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.37 12.64c-.03-2.7 2.2-4 2.3-4.06-1.25-1.83-3.2-2.08-3.9-2.11-1.66-.17-3.24.98-4.08.98-.85 0-2.14-.96-3.52-.93-1.81.03-3.48 1.05-4.41 2.67-1.88 3.26-.48 8.1 1.35 10.75.9 1.3 1.97 2.76 3.37 2.7 1.35-.05 1.86-.87 3.5-.87 1.63 0 2.09.87 3.52.84 1.46-.02 2.38-1.32 3.27-2.63 1.03-1.5 1.45-2.97 1.48-3.04-.03-.01-2.84-1.09-2.88-4.3zM13.7 4.7c.74-.9 1.24-2.15 1.1-3.4-1.07.04-2.36.71-3.13 1.6-.69.79-1.29 2.07-1.13 3.29 1.19.09 2.4-.6 3.16-1.49z"/></svg>
+            Continue with Apple
+          </button>
+        </div>
+        <div class="or rise" style="--i:4">or</div>
+        <button class="text-btn rise" style="--i:5" data-next>Skip, continue without signing in</button>
+      </div>
+
+      <!-- STEP 2: Import -->
+      <div class="step" data-step="1">
+        <h1 class="rise" style="--i:0">Import your data</h1>
+        <p class="sub rise" style="--i:1">Choose the browsers you want to bring bookmarks, passwords and history from.</p>
+
+        <!--
+          PLACEHOLDER: this list is hardcoded (Brave, Chrome).
+          TODO (Rust backend): detect installed browsers on the user's machine and
+          render only those. Expected shape per entry: { id, name, profileCount }.
+          Replace the `INSTALLED_BROWSERS` array in the script with the IPC result.
+        -->
+        <div class="list" id="browserList" role="group" aria-label="Browsers"></div>
+        <p class="note rise" style="--i:4">You can import again anytime from Settings.</p>
+
+        <div class="stack" style="margin-top:20px">
+          <button class="btn primary rise" style="--i:5" id="importBtn" disabled>
+            <span class="spin"></span><span id="importLabel">Import</span>
+          </button>
+        </div>
+        <button class="text-btn rise" style="--i:6" id="skipImport">Skip for now</button>
+      </div>
+    </div>
+
+    <div class="dots" id="dots"><i class="on"></i><i></i></div>
+  </section>
+</main>
+
+<script>
+/* ---------- Background video ---------- */
+const v = document.getElementById('loop');
+const showVideo = () => v.classList.add('ready');
+v.addEventListener('canplay', showVideo, {once:true});
+v.play().catch(()=>{});                       // autoplay is allowed when muted
+if (v.readyState >= 3) showVideo();
+
+/* ---------- PLACEHOLDER data: replace with Rust IPC result ---------- */
+const INSTALLED_BROWSERS = [
+  { id:'brave',  name:'Brave',  hint:'Bookmarks, passwords, history' },
+  { id:'chrome', name:'Chrome', hint:'Bookmarks, passwords, history' },
+];
+
+/* ---------- Hooks for the Rust side (all placeholders) ---------- */
+const hooks = {
+  signIn:  async (provider) => { /* TODO: start OAuth via backend, provider = 'google' | 'apple' */ },
+  import:  async (ids)      => { /* TODO: invoke backend import for the selected browser ids */ await new Promise(r=>setTimeout(r,1200)); },
+  finish:  ()               => { /* TODO: tell the backend onboarding is complete, e.g. navigate to the new tab page */ console.log('onboarding complete'); },
+};
+
+/* ---------- Step navigation ---------- */
+const steps = [...document.querySelectorAll('.step')];
+const dots  = [...document.querySelectorAll('#dots i')];
+let current = 0;
+
+function go(n){
+  if (n === current) return;
+  steps[current].classList.remove('active');
+  steps[current].classList.add('out');
+  current = n;
+  steps[current].classList.remove('out');
+  steps[current].classList.add('active');
+  dots.forEach((d,i)=>d.classList.toggle('on', i===current));
+}
+function finish(){
+  document.getElementById('panel').classList.add('leave');
+  setTimeout(hooks.finish, 650);
+}
+
+/* ---------- Step 1 ---------- */
+document.querySelectorAll('[data-auth]').forEach(b => b.addEventListener('click', async () => {
+  await hooks.signIn(b.dataset.auth);
+  go(1);
+}));
+document.querySelector('[data-next]').addEventListener('click', () => go(1));
+
+/* ---------- Step 2 ---------- */
+const list = document.getElementById('browserList');
+const importBtn = document.getElementById('importBtn');
+const selected = new Set();
+
+INSTALLED_BROWSERS.forEach((b,i) => {
+  const el = document.createElement('button');
+  el.className = 'browser rise';
+  el.style.setProperty('--i', 2 + i * 0.6);
+  el.setAttribute('role','checkbox');
+  el.setAttribute('aria-checked','false');
+  el.innerHTML = `
+    <span class="ico">${b.name[0]}</span>
+    <span class="meta"><span class="name">${b.name}</span><br><span class="hint">${b.hint}</span></span>
+    <span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg></span>`;
+  el.addEventListener('click', () => {
+    const on = el.getAttribute('aria-checked') !== 'true';
+    el.setAttribute('aria-checked', on);
+    on ? selected.add(b.id) : selected.delete(b.id);
+    importBtn.disabled = selected.size === 0;
+  });
+  list.appendChild(el);
+});
+
+importBtn.addEventListener('click', async () => {
+  importBtn.classList.add('loading');
+  document.getElementById('importLabel').textContent = 'Importing';
+  await hooks.import([...selected]);
+  finish();
+});
+document.getElementById('skipImport').addEventListener('click', finish);
+</script>
+</body>
+</html>
