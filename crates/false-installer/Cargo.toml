@@ -1,6 +1,6 @@
 [package]
 name = "false-installer"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["zaidi"]
 description = "Fast, standalone Windows installer for False Browser"
