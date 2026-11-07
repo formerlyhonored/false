@@ -9,9 +9,6 @@
 [![License](https://img.shields.io/badge/license-Proprietary-gray?style=flat-square&color=3f3f46)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-blue?style=flat-square&logo=windows&color=0284c7)](https://microsoft.com/windows)
 
-<p align="center">
-  Developed solely by <b>zaidi</b>
-</p>
 
 </div>
 
