@@ -1915,63 +1915,36 @@ async fn check_browser_update(endpoint: Option<String>) -> Result<UpdateCheckRes
 }
 
 #[tauri::command]
-async fn apply_browser_update(source: String) -> Result<String, String> {
-    let current_exe = std::env::current_exe().map_err(|e| format!("Cannot resolve current executable: {}", e))?;
-    let updates_dir = data_dir().join("updates");
-    let _ = std::fs::create_dir_all(&updates_dir);
-    let staged_exe = updates_dir.join("false-ui_new.exe");
-
-    if source.starts_with("http://") || source.starts_with("https://") {
-        let script = r#"$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri $env:FALSE_UPDATE_URL -OutFile $env:FALSE_UPDATE_OUT"#;
-        let out = tokio::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", script])
-            .env("FALSE_UPDATE_URL", &source)
-            .env("FALSE_UPDATE_OUT", &staged_exe)
-            .output()
-            .await
-            .map_err(|e| format!("Update download failed: {}", e))?;
-        if !out.status.success() {
-            return Err("Failed to download update binary.".to_string());
-        }
-    } else {
-        let p = PathBuf::from(&source);
-        if !p.exists() {
-            return Err(format!("Update file not found: {}", source));
-        }
-        std::fs::copy(&p, &staged_exe).map_err(|e| format!("Failed to copy update file: {}", e))?;
-    }
-
-    if !staged_exe.exists() || staged_exe.metadata().map(|m| m.len()).unwrap_or(0) < 1000 {
-        return Err("Update file is incomplete or invalid.".to_string());
-    }
-
-    let batch_path = updates_dir.join("apply_update.bat");
-    let batch_content = format!(
-        "@echo off\r\ntimeout /t 1 /nobreak > nul\r\ntaskkill /f /im false-ui.exe > nul 2>&1\r\nmove /y \"{}\" \"{}\" > nul\r\nstart \"\" \"{}\"\r\ndel \"%~f0\" & exit\r\n",
-        staged_exe.display(),
-        current_exe.display(),
-        current_exe.display()
-    );
-    std::fs::write(&batch_path, batch_content).map_err(|e| format!("Failed to write updater script: {}", e))?;
-
-    std::process::Command::new("cmd")
-        .args(["/c", "start", "", &batch_path.to_string_lossy()])
-        .spawn()
-        .map_err(|e| format!("Failed to launch updater: {}", e))?;
-
-    tokio::spawn(async {
-        tokio::time::sleep(Duration::from_millis(300)).await;
-        std::process::exit(0);
-    });
-
-    Ok("Update downloaded! False will now restart with the new version.".to_string())
-}
-
-#[tauri::command]
 async fn apply_flse_update(
     source_path: Option<String>,
+    source_url: Option<String>,
     base64_content: Option<String>,
 ) -> Result<flse::FlseUpdateResult, String> {
+    if let Some(url) = source_url {
+        if !(url.starts_with("https://") || url.starts_with("http://")) {
+            return Err("Update URL must use http or https.".to_string());
+        }
+        let updates_dir = data_dir().join("updates");
+        std::fs::create_dir_all(&updates_dir)
+            .map_err(|e| format!("Cannot create update folder: {}", e))?;
+        let target = updates_dir.join("download.flse");
+        let script = r#"$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri $env:FALSE_UPDATE_URL -OutFile $env:FALSE_UPDATE_OUT"#;
+        let status = tokio::process::Command::new("powershell")
+            .args(["-NoProfile", "-Command", script])
+            .env("FALSE_UPDATE_URL", &url)
+            .env("FALSE_UPDATE_OUT", &target)
+            .status()
+            .await
+            .map_err(|e| format!("Update download failed: {}", e))?;
+        if !status.success() {
+            return Err("Failed to download the signed update package.".to_string());
+        }
+        let bytes = std::fs::read(&target)
+            .map_err(|e| format!("Cannot read downloaded package: {}", e))?;
+        let _ = std::fs::remove_file(&target);
+        return flse::apply_package_bytes(&bytes);
+    }
+
     if let Some(b64) = base64_content {
         let clean = b64.trim();
         let payload = if let Some(idx) = clean.find(',') {
@@ -2392,7 +2365,6 @@ pub fn run() {
             focus_shell,
             get_app_version,
             check_browser_update,
-            apply_browser_update,
             apply_flse_update,
             export_flse_package,
             get_pending_flse,

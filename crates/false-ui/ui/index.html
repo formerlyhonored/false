@@ -2818,7 +2818,7 @@ const settingsHTML=()=>`<div class="sp"><h1>Settings</h1>
   <div class="sr"><div class="sl">Setup & Onboarding<span>Re-run the welcome onboarding setup to sync accounts or import data.</span></div><button class="opt" id="btnRunOnboarding" style="width:auto;align-items:center;padding:8px 16px"><b>Run Setup…</b></button></div>
   <h2>About & Updates</h2>
   <div class="sr col">
-    <div class="sl">false<span id="appVerLabel">Version 0.1.2 · Developed solely by zaidi</span></div>
+    <div class="sl">false<span id="appVerLabel">Version 0.1.3 · Developed solely by zaidi</span></div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
       <button class="opt" id="btnCheckUpdate" style="width:auto;align-items:center;padding:8px 16px"><b>Check for updates</b></button>
       <button class="opt" id="btnImportFlse" style="width:auto;align-items:center;padding:8px 16px;background:rgba(var(--w),.08);border:1px solid var(--ln-bright)" title="Import a .flse update file to update False"><b>Import .flse update</b></button>
@@ -2941,7 +2941,7 @@ function bindSettingsCore(){
         if(btnApply)btnApply.dataset.url=res.download_url||'';
       }else{
         if(cardNotice)cardNotice.style.display='none';
-        const msg=(res&&res.error)?res.error:`false is up to date (v${res?res.current_version:'0.1.2'}).`;
+        const msg=(res&&res.error)?res.error:`false is up to date (v${res?res.current_version:'0.1.3'}).`;
         if(txtStatus)txtStatus.textContent=msg;
         toast(msg);
       }
@@ -2959,8 +2959,11 @@ function bindSettingsCore(){
     if(txtStatus)txtStatus.textContent='Downloading and applying update…';
     toast('Updating false… please wait');
     try{
-      const msg=await tauriInvoke('apply_browser_update',{source:url});
-      if(txtStatus)txtStatus.textContent=msg||'Update launched. Restarting…';
+      const res=await tauriInvoke('apply_flse_update',{sourceUrl:url});
+      const msg=(res&&res.message)||'Update installed. Restarting…';
+      if(txtStatus)txtStatus.textContent=msg;
+      toast(msg);
+      if(res&&!res.requires_restart) setTimeout(()=>location.reload(),1000);
     }catch(err){
       alert('Update failed: '+String(err));
       if(txtStatus)txtStatus.textContent='Update failed: '+String(err);
@@ -2968,13 +2971,17 @@ function bindSettingsCore(){
     }
   };
   if(btnManual)btnManual.onclick=async()=>{
-    const source=prompt('Enter the full path or URL of the new false.exe or update package:');
+    const source=prompt('Enter the full path or URL of the signed .flse update package:');
     if(!source||!source.trim())return;
-    if(!confirm(`Apply update from "${source.trim()}"? false will restart into the new version.`))return;
+    const value=source.trim();
+    if(!confirm(`Apply signed update from "${value}"? false will restart if the package contains a new binary.`))return;
     if(txtStatus)txtStatus.textContent='Applying update…';
     try{
-      const msg=await tauriInvoke('apply_browser_update',{source:source.trim()});
-      toast(msg||'Update applied. Restarting…');
+      const args=/^https?:\/\//i.test(value)?{sourceUrl:value}:{sourcePath:value};
+      const res=await tauriInvoke('apply_flse_update',args);
+      const msg=(res&&res.message)||'Update applied. Restarting…';
+      toast(msg);
+      if(res&&!res.requires_restart) setTimeout(()=>location.reload(),1000);
     }catch(err){
       alert('Failed to apply update: '+String(err));
       if(txtStatus)txtStatus.textContent='Update failed: '+String(err);
