@@ -52,7 +52,16 @@ $manifest = @{
     has_ui = $true
 } | ConvertTo-Json -Depth 5
 
-Set-Content -Path (Join-Path $stage "manifest.json") -Value $manifest -Encoding UTF8
+$manifestPath = Join-Path $stage "manifest.json"
+$manifestSig = Join-Path $stage "manifest.sig"
+# Write without a BOM: the signature is over these exact bytes.
+[System.IO.File]::WriteAllText($manifestPath, $manifest, (New-Object System.Text.UTF8Encoding($false)))
+
+Write-Host "Signing manifest..." -ForegroundColor Cyan
+node (Join-Path $Root "scripts\sign-manifest.mjs") $manifestPath $manifestSig
+if ($LASTEXITCODE -ne 0) { throw "Manifest signing failed" }
+node (Join-Path $Root "scripts\verify-manifest.mjs") $manifestPath $manifestSig
+if ($LASTEXITCODE -ne 0) { throw "Manifest signature verification failed" }
 
 $uiDest = Join-Path $stage "ui"
 New-Item -ItemType Directory -Path $uiDest | Out-Null

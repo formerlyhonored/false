@@ -23,6 +23,10 @@ $RECYCLE.BIN/
 .idea/
 TODO.md
 
+# Signing material: only the public key (keys/*.pub) belongs in the repo
+*.key.pem
+*private*.pem
+
 website/
 /website/
 
