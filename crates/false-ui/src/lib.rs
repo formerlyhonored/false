@@ -304,6 +304,16 @@ pub struct BlockEntry {
     pub kind: String,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ProfileRecord {
+    pub id: String,
+    pub name: String,
+    pub email: String,
+    pub avatar: String,
+    pub color: String,
+    pub created_at: i64,
+}
+
 /// Every tab gets its own native child webview (`web_<id>`), so tabs keep
 /// independent history, cookies, scroll position and page state.
 fn tab_label(tab_id: u32) -> String {
@@ -346,27 +356,46 @@ fn apply_schema(conn: &Connection) -> rusqlite::Result<()> {
             key   TEXT PRIMARY KEY,
             value TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS profiles (
+            id         TEXT PRIMARY KEY,
+            name       TEXT NOT NULL,
+            email      TEXT NOT NULL DEFAULT '',
+            avatar     TEXT NOT NULL DEFAULT '',
+            color      TEXT NOT NULL DEFAULT '#3b82f6',
+            created_at INTEGER NOT NULL
+        );
+        INSERT OR IGNORE INTO profiles (id, name, email, avatar, color, created_at)
+        VALUES ('personal', 'Personal', '', '', '#3b82f6', 1700000000);
+        INSERT OR IGNORE INTO profiles (id, name, email, avatar, color, created_at)
+        VALUES ('work', 'Work', '', '', '#10b981', 1700000001);
         CREATE TABLE IF NOT EXISTS history (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             url        TEXT NOT NULL,
             title      TEXT NOT NULL DEFAULT '',
             host       TEXT NOT NULL DEFAULT '',
-            visited_at INTEGER NOT NULL
+            visited_at INTEGER NOT NULL,
+            profile_id TEXT NOT NULL DEFAULT 'personal'
         );
         CREATE INDEX IF NOT EXISTS idx_history_visited ON history(visited_at DESC);
         CREATE INDEX IF NOT EXISTS idx_history_host ON history(host);
         CREATE TABLE IF NOT EXISTS bookmarks (
-            id       INTEGER PRIMARY KEY AUTOINCREMENT,
-            url      TEXT NOT NULL UNIQUE,
-            title    TEXT NOT NULL DEFAULT '',
-            host     TEXT NOT NULL DEFAULT '',
-            added_at INTEGER NOT NULL
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            url        TEXT NOT NULL UNIQUE,
+            title      TEXT NOT NULL DEFAULT '',
+            host       TEXT NOT NULL DEFAULT '',
+            added_at   INTEGER NOT NULL,
+            profile_id TEXT NOT NULL DEFAULT 'personal'
         );
         CREATE TABLE IF NOT EXISTS adblock_allow (
             host TEXT PRIMARY KEY
         );
         "#,
-    )
+    )?;
+    let _ = conn.execute("ALTER TABLE history ADD COLUMN profile_id TEXT NOT NULL DEFAULT 'personal'", []);
+    let _ = conn.execute("ALTER TABLE bookmarks ADD COLUMN profile_id TEXT NOT NULL DEFAULT 'personal'", []);
+    let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_history_profile ON history(profile_id)", []);
+    let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_bookmarks_profile ON bookmarks(profile_id)", []);
+    Ok(())
 }
 
 fn open_db() -> Result<Db, String> {
@@ -835,6 +864,54 @@ fn start_proxy(ad: Arc<AdBlock>) -> Option<u16> {
 fn init_script() -> &'static str {
     r#"
     (function () {
+        // Calm & Instant Cosmetic Ad / Cookie Consent Banner Blocker
+        try {
+            var calmCss = [
+                'ins.adsbygoogle',
+                '.adsbygoogle',
+                '.ad-container',
+                '.ad-box',
+                '.ad-placement',
+                '.banner-ad',
+                '[id^="google_ads_"]',
+                '[id^="aswift_"]',
+                '#onetrust-banner-sdk',
+                '#onetrust-consent-sdk',
+                '.cookie-banner',
+                '.cookie-consent',
+                '.truste_box_overlay',
+                '.cmpbox',
+                '#cookie-law-info-bar',
+                '.qc-cmp2-container',
+                '#didomi-host'
+            ].join(',') + '{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;height:0!important;min-height:0!important;}';
+
+            var calmStyle = document.createElement('style');
+            calmStyle.id = '__false_calm_blocker';
+            calmStyle.textContent = calmCss;
+            (document.head || document.documentElement).appendChild(calmStyle);
+
+            function calmClean() {
+                var banners = document.querySelectorAll('#onetrust-banner-sdk, #onetrust-consent-sdk, .cookie-banner, .cookie-consent, .qc-cmp2-container, #didomi-host');
+                for (var i = 0; i < banners.length; i++) {
+                    try { banners[i].remove(); } catch(e){}
+                }
+                if (document.body && document.body.style.overflow === 'hidden' && document.querySelectorAll('.modal, .dialog').length === 0) {
+                    document.body.style.overflow = '';
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', calmClean);
+            } else {
+                calmClean();
+            }
+            var calmObs = new MutationObserver(function () {
+                calmClean();
+            });
+            calmObs.observe(document.documentElement, { childList: true, subtree: true });
+            setTimeout(function() { calmObs.disconnect(); }, 8000);
+        } catch (e) {}
+
         // Browser shortcuts must keep working while a page (not the shell) has
         // focus. We cannot use Tauri IPC from a remote origin, so send a
         // sentinel navigation that the host recognises and cancels.
@@ -1336,7 +1413,12 @@ fn reset_state(db: State<'_, Db>) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn history_add(db: State<'_, Db>, url: String, title: String) -> Result<(), String> {
+fn history_add(
+    db: State<'_, Db>,
+    url: String,
+    title: String,
+    profile_id: Option<String>,
+) -> Result<(), String> {
     if !url.starts_with("http://") && !url.starts_with("https://") {
         return Ok(());
     }
@@ -1347,12 +1429,13 @@ fn history_add(db: State<'_, Db>, url: String, title: String) -> Result<(), Stri
         title
     };
     let now = now_secs();
+    let prof = profile_id.unwrap_or_else(|| "personal".to_string());
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
 
     let last: Option<(i64, i64, String)> = conn
         .query_row(
-            "SELECT id, visited_at, url FROM history ORDER BY id DESC LIMIT 1",
-            [],
+            "SELECT id, visited_at, url FROM history WHERE profile_id=?1 ORDER BY id DESC LIMIT 1",
+            params![prof],
             |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
         )
         .optional()
@@ -1369,8 +1452,8 @@ fn history_add(db: State<'_, Db>, url: String, title: String) -> Result<(), Stri
     }
 
     conn.execute(
-        "INSERT INTO history(url,title,host,visited_at) VALUES(?1,?2,?3,?4)",
-        params![url, title, host, now],
+        "INSERT INTO history(url,title,host,visited_at,profile_id) VALUES(?1,?2,?3,?4,?5)",
+        params![url, title, host, now, prof],
     )
     .map_err(|e| e.to_string())?;
     conn.execute(
@@ -1386,20 +1469,22 @@ fn history_list(
     db: State<'_, Db>,
     query: Option<String>,
     limit: Option<i64>,
+    profile_id: Option<String>,
 ) -> Result<Vec<HistoryEntry>, String> {
     let q = query.unwrap_or_default();
     let like = format!("%{}%", q);
     let lim = limit.unwrap_or(400).clamp(1, 2000);
+    let prof = profile_id.unwrap_or_default();
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
     let mut stmt = conn
         .prepare(
             "SELECT id,url,title,host,visited_at FROM history
-             WHERE (?1='' OR url LIKE ?2 OR title LIKE ?2)
-             ORDER BY visited_at DESC, id DESC LIMIT ?3",
+             WHERE (?1='' OR profile_id=?1) AND (?2='' OR url LIKE ?3 OR title LIKE ?3)
+             ORDER BY visited_at DESC, id DESC LIMIT ?4",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
-        .query_map(params![q, like, lim], |r| {
+        .query_map(params![prof, q, like, lim], |r| {
             Ok(HistoryEntry {
                 id: r.get(0)?,
                 url: r.get(1)?,
@@ -1422,10 +1507,15 @@ fn history_delete(db: State<'_, Db>, id: i64) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn history_clear(db: State<'_, Db>) -> Result<(), String> {
+fn history_clear(db: State<'_, Db>, profile_id: Option<String>) -> Result<(), String> {
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
-    conn.execute("DELETE FROM history", [])
-        .map_err(|e| e.to_string())?;
+    if let Some(prof) = profile_id {
+        conn.execute("DELETE FROM history WHERE profile_id=?1", params![prof])
+            .map_err(|e| e.to_string())?;
+    } else {
+        conn.execute("DELETE FROM history", [])
+            .map_err(|e| e.to_string())?;
+    }
     Ok(())
 }
 
@@ -1434,6 +1524,7 @@ fn bookmark_toggle(
     db: State<'_, Db>,
     url: String,
     title: String,
+    profile_id: Option<String>,
 ) -> Result<bool, String> {
     if !url.starts_with("http://") && !url.starts_with("https://") {
         return Ok(false);
@@ -1444,11 +1535,14 @@ fn bookmark_toggle(
     } else {
         title
     };
+    let prof = profile_id.unwrap_or_else(|| "personal".to_string());
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
     let existing: Option<i64> = conn
-        .query_row("SELECT id FROM bookmarks WHERE url=?1", params![url], |r| {
-            r.get(0)
-        })
+        .query_row(
+            "SELECT id FROM bookmarks WHERE url=?1 AND profile_id=?2",
+            params![url, prof],
+            |r| r.get(0),
+        )
         .optional()
         .map_err(|e| e.to_string())?;
     if let Some(id) = existing {
@@ -1457,8 +1551,8 @@ fn bookmark_toggle(
         Ok(false)
     } else {
         conn.execute(
-            "INSERT OR REPLACE INTO bookmarks(url,title,host,added_at) VALUES(?1,?2,?3,?4)",
-            params![url, title, host, now_secs()],
+            "INSERT OR REPLACE INTO bookmarks(url,title,host,added_at,profile_id) VALUES(?1,?2,?3,?4,?5)",
+            params![url, title, host, now_secs(), prof],
         )
         .map_err(|e| e.to_string())?;
         Ok(true)
@@ -1466,28 +1560,33 @@ fn bookmark_toggle(
 }
 
 #[tauri::command]
-fn bookmark_is_set(db: State<'_, Db>, url: String) -> Result<bool, String> {
+fn bookmark_is_set(db: State<'_, Db>, url: String, profile_id: Option<String>) -> Result<bool, String> {
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
+    let prof = profile_id.unwrap_or_default();
     let found: Option<i64> = conn
-        .query_row("SELECT id FROM bookmarks WHERE url=?1", params![url], |r| {
-            r.get(0)
-        })
+        .query_row(
+            "SELECT id FROM bookmarks WHERE url=?1 AND (?2='' OR profile_id=?2)",
+            params![url, prof],
+            |r| r.get(0),
+        )
         .optional()
         .map_err(|e| e.to_string())?;
     Ok(found.is_some())
 }
 
 #[tauri::command]
-fn bookmarks_list(db: State<'_, Db>) -> Result<Vec<BookmarkEntry>, String> {
+fn bookmarks_list(db: State<'_, Db>, profile_id: Option<String>) -> Result<Vec<BookmarkEntry>, String> {
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
+    let prof = profile_id.unwrap_or_default();
     let mut stmt = conn
         .prepare(
             "SELECT id,url,title,host,added_at FROM bookmarks
+             WHERE (?1='' OR profile_id=?1)
              ORDER BY added_at DESC, id DESC",
         )
         .map_err(|e| e.to_string())?;
     let rows = stmt
-        .query_map([], |r| {
+        .query_map(params![prof], |r| {
             Ok(BookmarkEntry {
                 id: r.get(0)?,
                 url: r.get(1)?,
@@ -1507,6 +1606,93 @@ fn bookmark_remove(db: State<'_, Db>, id: i64) -> Result<(), String> {
     conn.execute("DELETE FROM bookmarks WHERE id=?1", params![id])
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Profiles & Account Management
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+fn profiles_list(db: State<'_, Db>) -> Result<Vec<ProfileRecord>, String> {
+    let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT id, name, email, avatar, color, created_at FROM profiles ORDER BY created_at ASC")
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |r| {
+            Ok(ProfileRecord {
+                id: r.get(0)?,
+                name: r.get(1)?,
+                email: r.get(2)?,
+                avatar: r.get(3)?,
+                color: r.get(4)?,
+                created_at: r.get(5)?,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    rows.collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn profile_save(db: State<'_, Db>, profile: ProfileRecord) -> Result<(), String> {
+    let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
+    conn.execute(
+        "INSERT INTO profiles(id, name, email, avatar, color, created_at)
+         VALUES(?1, ?2, ?3, ?4, ?5, ?6)
+         ON CONFLICT(id) DO UPDATE SET
+            name = excluded.name,
+            email = excluded.email,
+            avatar = excluded.avatar,
+            color = excluded.color",
+        params![
+            profile.id,
+            profile.name,
+            profile.email,
+            profile.avatar,
+            profile.color,
+            profile.created_at
+        ],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn profile_delete(db: State<'_, Db>, id: String) -> Result<(), String> {
+    if id == "personal" {
+        return Err("Cannot delete default personal profile".into());
+    }
+    let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
+    conn.execute("DELETE FROM profiles WHERE id=?1", params![id])
+        .map_err(|e| e.to_string())?;
+    conn.execute("DELETE FROM bookmarks WHERE profile_id=?1", params![id])
+        .map_err(|e| e.to_string())?;
+    conn.execute("DELETE FROM history WHERE profile_id=?1", params![id])
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn profile_set_active(db: State<'_, Db>, id: String) -> Result<(), String> {
+    let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
+    conn.execute(
+        "INSERT INTO settings(key, value) VALUES('active_profile', ?1)
+         ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        params![id],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn profile_get_active(db: State<'_, Db>) -> Result<String, String> {
+    let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
+    let active: Option<String> = conn
+        .query_row("SELECT value FROM settings WHERE key='active_profile'", [], |r| r.get(0))
+        .optional()
+        .map_err(|e| e.to_string())?;
+    Ok(active.unwrap_or_else(|| "personal".into()))
 }
 
 // ---------------------------------------------------------------------------
@@ -2136,6 +2322,11 @@ pub fn run() {
             bookmark_is_set,
             bookmarks_list,
             bookmark_remove,
+            profiles_list,
+            profile_save,
+            profile_delete,
+            profile_set_active,
+            profile_get_active,
             adblock_info,
             adblock_set_enabled,
             adblock_allow_site,

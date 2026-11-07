@@ -273,6 +273,43 @@ input,textarea{user-select:text!important;-webkit-user-select:text!important;cur
 .dl-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 16px;color:var(--mute);font-size:12px;text-align:center}
 .dl-empty svg{width:26px;height:26px;opacity:.4;stroke:currentColor;fill:none;stroke-width:1.6}
 
+/* Profile Switcher & Popover */
+.profile-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
+.profile-avatar-pill{width:22px;height:22px;border-radius:50%;background:var(--profile-color,#3b82f6);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.14);background-size:cover;background-position:center;text-transform:uppercase;transition:transform .12s ease}
+.profile-btn:hover .profile-avatar-pill{transform:scale(1.06)}
+.profile-pop{position:fixed;top:56px;right:12px;width:320px;background:var(--b2);border:1px solid var(--ln-bright);border-radius:14px;padding:16px;display:none;flex-direction:column;gap:12px;z-index:1000;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.8)}
+.profile-pop.on{display:flex;animation:dlPopIn .18s var(--ease)}
+.profile-head{display:flex;align-items:center;gap:12px}
+.profile-avatar-large{width:42px;height:42px;border-radius:50%;background:var(--profile-color,#3b82f6);color:#fff;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;border:2px solid rgba(255,255,255,.15);background-size:cover;background-position:center;text-transform:uppercase}
+.profile-meta{flex:1;min-width:0}
+.profile-name{font-size:14px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-sub{font-size:11px;color:var(--mute);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-google-card{background:rgba(255,255,255,.03);border:1px solid var(--ln);border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.profile-google-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:32px;border-radius:7px;background:rgba(255,255,255,.06);border:1px solid var(--ln);color:var(--fg);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s,border-color .15s}
+.profile-google-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2)}
+.profile-divider{height:1px;background:var(--ln);margin:2px 0}
+.profile-section-title{font-size:10px;font-weight:700;color:var(--dim);letter-spacing:.06em}
+.profile-list{display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;scrollbar-width:thin}
+.profile-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:transparent;border:1px solid transparent;cursor:pointer;transition:background .12s,border-color .12s;text-align:left}
+.profile-item:hover{background:rgba(255,255,255,.04)}
+.profile-item.active{background:rgba(255,255,255,.07);border-color:var(--ln-bright)}
+.profile-item-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.profile-item-info{flex:1;min-width:0}
+.profile-item-name{font-size:12.5px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-item-email{font-size:10.5px;color:var(--mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-item-check{display:none;width:14px;height:14px;stroke:var(--ac);fill:none;stroke-width:2.2}
+.profile-item.active .profile-item-check{display:block}
+.profile-actions{display:flex;align-items:center;gap:8px;margin-top:4px}
+.profile-act-btn{flex:1;height:28px;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid var(--ln);color:var(--mute);font-size:11.5px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .12s,color .12s}
+.profile-act-btn:hover{background:rgba(255,255,255,.1);color:var(--fg)}
+.profile-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:10000;display:none;place-items:center;padding:20px}
+.profile-modal-backdrop.on{display:grid;animation:fade .18s var(--ease)}
+.profile-modal{width:100%;max-width:400px;background:var(--b2);border:1px solid var(--ln-bright);border-radius:14px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.85);display:flex;flex-direction:column;gap:14px}
+.profile-color-picker{display:flex;align-items:center;gap:10px;margin-top:4px}
+.profile-color-picker .color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .12s,border-color .12s}
+.profile-color-picker .color-dot:hover{transform:scale(1.12)}
+.profile-color-picker .color-dot.on{border-color:#fff;transform:scale(1.15)}
+
 /* Tab Sleeping & Audio indicators */
 .tab .zz-badge{display:none;flex:none;width:15px;height:15px;color:var(--mute);opacity:.6;margin-left:auto;margin-right:2px}
 .tab.zz .zz-badge{display:grid;place-items:center}
@@ -785,6 +822,7 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
     <button class="ib" id="dlTop" aria-label="Downloads" title="Downloads"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5"/><path d="M5 19h14"/></svg></button>
     <button class="ib" id="historyTop" aria-label="History" title="History (Ctrl+H)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></button>
     <button class="ib" id="setTop" aria-label="Settings" title="Settings (Ctrl+,)"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
+    <button class="ib profile-btn" id="profileTop" aria-label="Profiles & Google Account" title="Profiles & Google Account"><span class="profile-avatar-pill" id="topProfileAvatar">P</span></button>
   </div>
   <div class="load" id="load"><div class="load-beam"></div></div>
 </header>
@@ -800,6 +838,64 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
     </div>
   </div>
   <div class="dl-list" id="dlList"></div>
+</div>
+<div class="profile-pop" id="profilePop">
+  <div class="profile-head">
+    <div class="profile-avatar-large" id="popProfileAvatar">P</div>
+    <div class="profile-meta">
+      <div class="profile-name" id="popProfileName">Personal</div>
+      <div class="profile-sub" id="popProfileEmail">Local Profile &middot; Not synced</div>
+    </div>
+  </div>
+  <div class="profile-google-card" id="popGoogleCard">
+    <button class="profile-google-btn" id="popBtnGoogle">
+      <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.27 21.42 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.97 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.27 2.58 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+      <span id="popGoogleBtnLabel">Connect Google Account</span>
+    </button>
+  </div>
+  <div class="profile-divider"></div>
+  <div class="profile-section-title">PROFILES</div>
+  <div class="profile-list" id="profileList"></div>
+  <div class="profile-actions">
+    <button class="profile-act-btn" id="btnNewProfile">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Add Profile</span>
+    </button>
+    <button class="profile-act-btn" id="btnEditProfile">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span>Edit Active</span>
+    </button>
+  </div>
+</div>
+<div class="profile-modal-backdrop" id="profileModalBackdrop">
+  <div class="profile-modal" id="profileModal">
+    <div class="modal-head">
+      <h3 id="profileModalTitle">Profile Details</h3>
+      <button class="modal-close" id="profileModalClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <label class="modal-label">Profile Name</label>
+      <input type="text" class="modal-input" id="profileNameInput" placeholder="e.g. Personal, Work, Projects">
+      <label class="modal-label">Google Account / Email (Optional)</label>
+      <input type="text" class="modal-input" id="profileEmailInput" placeholder="user@gmail.com">
+      <label class="modal-label">Avatar URL (Optional)</label>
+      <input type="text" class="modal-input" id="profileAvatarInput" placeholder="https://... (or leave blank for initial letter)">
+      <label class="modal-label">Profile Accent Color</label>
+      <div class="profile-color-picker" id="profileColorPicker">
+        <span class="color-dot on" data-color="#3b82f6" style="background:#3b82f6"></span>
+        <span class="color-dot" data-color="#10b981" style="background:#10b981"></span>
+        <span class="color-dot" data-color="#8b5cf6" style="background:#8b5cf6"></span>
+        <span class="color-dot" data-color="#f59e0b" style="background:#f59e0b"></span>
+        <span class="color-dot" data-color="#ec4899" style="background:#ec4899"></span>
+        <span class="color-dot" data-color="#06b6d4" style="background:#06b6d4"></span>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" id="profileModalCancel">Cancel</button>
+      <button class="modal-btn danger" id="profileModalDelete" style="display:none">Delete Profile</button>
+      <button class="modal-btn primary" id="profileModalSave">Save</button>
+    </div>
+  </div>
 </div>
 <div class="reader-view" id="readerView">
   <button class="reader-close" id="readerClose"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>Exit Reader</button>
@@ -1486,7 +1582,7 @@ document.addEventListener('click',e=>{
 async function toggleBookmark(){
   const t=cur();
   if(!t||!isHttp(t.url)){toast('Open a website to bookmark it');return}
-  const on=await tauriInvoke('bookmark_toggle',{url:t.url,title:t.title||fullHost(t.url)});
+  const on=await tauriInvoke('bookmark_toggle',{url:t.url,title:t.title||fullHost(t.url),profileId:activeProfileId});
   await refreshBookmarks();
   updateStar(t);
   renderBookmarksBar();
@@ -1526,6 +1622,9 @@ async function hydrateState(){
   const s=await tauriInvoke('load_state');
   if(!s||typeof s!=='object')return;
   bootState=s;
+  if(s.onboarding_done === 'true'){
+    try{localStorage.setItem('false_onboarding_done','true');}catch(e){}
+  }
   const has=k=>{try{return !!localStorage.getItem(k)}catch(e){return false}};
   try{
     if(!has('false_cfg')&&s.cfg)Object.assign(cfg,JSON.parse(s.cfg));
@@ -1539,14 +1638,14 @@ async function hydrateState(){
 }
 
 async function refreshBookmarks(){
-  bookmarkCache=(await tauriInvoke('bookmarks_list'))||[];
+  bookmarkCache=(await tauriInvoke('bookmarks_list',{profileId:activeProfileId}))||[];
   updateStar();
   renderBookmarksBar();
   if(cur()&&!cur().url&&!cur().page)renderView();
 }
 
 async function refreshHistory(){
-  historyCache=(await tauriInvoke('history_list',{limit:600}))||[];
+  historyCache=(await tauriInvoke('history_list',{limit:600,profileId:activeProfileId}))||[];
 }
 
 function renderBookmarksBar(){
@@ -1694,7 +1793,7 @@ function tabById(id){return tabs.find(t=>t.id===id)}
 function recordHistory(t){
   if(!t||!isHttp(t.url))return;
   const title=t.title&&t.title!=='New tab'?t.title:(fullHost(t.url)||host(t.url));
-  tauriInvoke('history_add',{url:t.url,title});
+  tauriInvoke('history_add',{url:t.url,title,profileId:activeProfileId});
   if(!historyCache.length||historyCache[0].url!==t.url){
     historyCache.unshift({id:0,url:t.url,title,host:fullHost(t.url),visited_at:Math.floor(Date.now()/1000)});
     if(historyCache.length>600)historyCache.pop();
@@ -2004,7 +2103,7 @@ function openTabMenu(e, tabId){
         if(t.url){copyText(t.url);toast('Link copied')}
       }
       else if(act==='bookmark'){
-        if(isWeb){const on=await tauriInvoke('bookmark_toggle',{url:t.url,title:t.title||fullHost(t.url)});await refreshBookmarks();toast(on?'Bookmarked':'Bookmark removed')}
+        if(isWeb){const on=await tauriInvoke('bookmark_toggle',{url:t.url,title:t.title||fullHost(t.url),profileId:activeProfileId});await refreshBookmarks();toast(on?'Bookmarked':'Bookmark removed')}
       }
       else if(act==='close'){closeTab(t.id)}
       else if(act==='close-others'){const others=tabs.filter(x=>x.id!==t.id&&!x.pinned);for(const o of others)closeTab(o.id)}
@@ -2037,7 +2136,7 @@ function saveSession(){
 
 function restoreSession(){
   if(!cfg.restore)return false;
-  if(!localStorage.getItem('false_onboarding_done'))return false;
+  if(!localStorage.getItem('false_onboarding_done') && !(bootState && bootState.onboarding_done === 'true'))return false;
   let s=null;
   try{s=JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){}
   if(!s&&bootState&&bootState.session){try{s=JSON.parse(bootState.session)}catch(e){}}
@@ -2495,7 +2594,7 @@ const settingsHTML=()=>`<div class="sp"><h1>Settings</h1>
   <div class="sr"><div class="sl">Setup & Onboarding<span>Re-run the welcome onboarding setup to sync accounts or import data.</span></div><button class="opt" id="btnRunOnboarding" style="width:auto;align-items:center;padding:8px 16px"><b>Run Setup…</b></button></div>
   <h2>About & Updates</h2>
   <div class="sr col">
-    <div class="sl">false<span id="appVerLabel">Version 0.1.0 · Developed solely by zaidi</span></div>
+    <div class="sl">false<span id="appVerLabel">Version 0.1.1 · Developed solely by zaidi</span></div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
       <button class="opt" id="btnCheckUpdate" style="width:auto;align-items:center;padding:8px 16px"><b>Check for updates</b></button>
       <button class="opt" id="btnImportFlse" style="width:auto;align-items:center;padding:8px 16px;background:rgba(var(--w),.08);border:1px solid var(--ln-bright)" title="Import a .flse update file to update False"><b>Import .flse update</b></button>
@@ -2619,7 +2718,7 @@ function bindSettingsCore(){
         if(btnApply)btnApply.dataset.url=res.download_url||'';
       }else{
         if(cardNotice)cardNotice.style.display='none';
-        const msg=(res&&res.error)?res.error:`false is up to date (v${res?res.current_version:'0.1.0'}).`;
+        const msg=(res&&res.error)?res.error:`false is up to date (v${res?res.current_version:'0.1.1'}).`;
         if(txtStatus)txtStatus.textContent=msg;
         toast(msg);
       }
@@ -3595,6 +3694,355 @@ function syncReaderBtn(t){
   readerBtn.classList.toggle('on', !!isWeb);
 }
 
+/* ---------- Profile & Account Controller ---------- */
+let profilesList = [];
+let activeProfileId = 'personal';
+let activeProfileRecord = null;
+let profileModalTargetId = null;
+let profileBusy = false;
+let profileWebviewHidden = false;
+let profileModalSavedCb = null;
+
+async function loadProfiles(){
+  try{
+    const res = await tauriInvoke('profiles_list');
+    if(Array.isArray(res) && res.length) profilesList = res;
+    else profilesList = [{id:'personal', name:'Personal', email:'', avatar:'', color:'#3b82f6', created_at: Date.now()}];
+  }catch(e){
+    profilesList = [{id:'personal', name:'Personal', email:'', avatar:'', color:'#3b82f6', created_at: Date.now()}];
+  }
+
+  try{
+    activeProfileId = (await tauriInvoke('profile_get_active')) || 'personal';
+  }catch(e){
+    activeProfileId = 'personal';
+  }
+
+  activeProfileRecord = profilesList.find(p => p.id === activeProfileId) || profilesList[0];
+  renderProfileBadge();
+  renderProfilePop();
+}
+
+function renderProfileBadge(){
+  const avatarEl = $('#topProfileAvatar');
+  if(!avatarEl || !activeProfileRecord) return;
+  const col = activeProfileRecord.color || '#3b82f6';
+  avatarEl.style.setProperty('--profile-color', col);
+  avatarEl.style.backgroundColor = col;
+  if(activeProfileRecord.avatar && activeProfileRecord.avatar.startsWith('http')){
+    avatarEl.style.backgroundImage = `url("${activeProfileRecord.avatar}")`;
+    avatarEl.textContent = '';
+  } else {
+    avatarEl.style.backgroundImage = '';
+    avatarEl.textContent = (activeProfileRecord.name || 'P').trim().charAt(0).toUpperCase();
+  }
+}
+
+function positionProfilePop(){
+  const pop = $('#profilePop');
+  if(!pop) return;
+  const top = document.querySelector('.top');
+  const bbar = $('#bbar');
+  const topBottom = top ? top.getBoundingClientRect().bottom : 52;
+  const barBottom = (bbar && bbar.classList.contains('on'))
+    ? bbar.getBoundingClientRect().bottom
+    : topBottom;
+  pop.style.top = Math.max(56, Math.min(barBottom + 4, innerHeight - 140)) + 'px';
+  pop.style.right = '12px';
+}
+
+function renderProfilePop(){
+  const pop = $('#profilePop');
+  if(!pop || !activeProfileRecord) return;
+  const col = activeProfileRecord.color || '#3b82f6';
+
+  const popAvatar = $('#popProfileAvatar');
+  if(popAvatar){
+    popAvatar.style.setProperty('--profile-color', col);
+    popAvatar.style.backgroundColor = col;
+    if(activeProfileRecord.avatar && activeProfileRecord.avatar.startsWith('http')){
+      popAvatar.style.backgroundImage = `url("${activeProfileRecord.avatar}")`;
+      popAvatar.textContent = '';
+    } else {
+      popAvatar.style.backgroundImage = '';
+      popAvatar.textContent = (activeProfileRecord.name || 'P').trim().charAt(0).toUpperCase();
+    }
+  }
+
+  const nameEl = $('#popProfileName');
+  if(nameEl) nameEl.textContent = activeProfileRecord.name || 'Personal';
+
+  const emailEl = $('#popProfileEmail');
+  if(emailEl){
+    if(activeProfileRecord.email){
+      emailEl.innerHTML = `<span style="color:#10b981">&#x2713;</span> ${esc(activeProfileRecord.email)}`;
+    } else {
+      emailEl.textContent = 'Local Profile \u2022 Not synced';
+    }
+  }
+
+  const btnLabel = $('#popGoogleBtnLabel');
+  if(btnLabel){
+    btnLabel.textContent = activeProfileRecord.email ? 'Manage Google Account' : 'Connect Google Account';
+  }
+
+  const listEl = $('#profileList');
+  if(listEl){
+    listEl.innerHTML = profilesList.map(p => {
+      const isActive = p.id === activeProfileId;
+      const pColor = p.color || '#3b82f6';
+      return `
+        <div class="profile-item${isActive ? ' active' : ''}" data-pid="${esc(p.id)}">
+          <div class="profile-item-dot" style="background:${pColor}"></div>
+          <div class="profile-item-info">
+            <div class="profile-item-name">${esc(p.name)}</div>
+            <div class="profile-item-email">${esc(p.email || 'Local space')}</div>
+          </div>
+          <svg class="profile-item-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.profile-item').forEach(item => {
+      item.onclick = async () => {
+        const pid = item.dataset.pid;
+        if(pid && pid !== activeProfileId){
+          await switchProfile(pid);
+        }
+      };
+    });
+  }
+}
+
+async function switchProfile(pid){
+  activeProfileId = pid;
+  try{
+    await tauriInvoke('profile_set_active', { id: pid });
+  }catch(e){}
+  await loadProfiles();
+  await refreshBookmarks();
+  await refreshHistory();
+  setProfileOpen(false);
+  toast(`Switched to ${activeProfileRecord.name}`);
+}
+
+async function setProfileOpen(open){
+  const pop = $('#profilePop');
+  const btn = $('#profileTop');
+  if(!pop || profileBusy) return;
+  const isOpen = pop.classList.contains('on');
+  if(open === isOpen) return;
+  profileBusy = true;
+  try{
+    if(open){
+      if(typeof setDownloadsOpen === 'function') setDownloadsOpen(false);
+      renderProfilePop();
+      positionProfilePop();
+      await freezePageForPopover();
+      if(!profileWebviewHidden){
+        profileWebviewHidden = true;
+        await tauriInvoke('hide_webviews').catch(()=>{});
+      }
+      pop.classList.add('on');
+      if(btn){ btn.classList.add('on'); btn.setAttribute('aria-expanded','true'); }
+    } else {
+      pop.classList.remove('on');
+      if(btn){ btn.classList.remove('on'); btn.setAttribute('aria-expanded','false'); }
+      if(profileWebviewHidden){
+        profileWebviewHidden = false;
+        const t = cur();
+        if(!omniEditing && t && t.url && !t.page && !t.sleeping){
+          await tauriInvoke('show_webview',{
+            tabId:t.id,url:t.url,bounds:getWebBounds(),force:false,
+            background:THEMES[theme].bg
+          }).catch(()=>{});
+        }
+      }
+      clearPageSnapshot();
+    }
+  } finally {
+    profileBusy = false;
+  }
+}
+
+function openProfileModal(pid, isGoogle = false, onSaved = null){
+  const backdrop = $('#profileModalBackdrop');
+  if(!backdrop) return;
+  profileModalTargetId = pid || null;
+  profileModalSavedCb = onSaved;
+  const p = profilesList.find(x => x.id === pid) || {
+    id: 'profile_' + Date.now().toString(36),
+    name: isGoogle ? 'Google Account' : '',
+    email: '',
+    avatar: '',
+    color: '#3b82f6',
+    created_at: Math.floor(Date.now() / 1000)
+  };
+
+  const titleEl = $('#profileModalTitle');
+  if(titleEl) titleEl.textContent = isGoogle ? 'Connect Google Account' : (pid ? 'Edit Profile' : 'Add New Profile');
+
+  const nameInput = $('#profileNameInput');
+  if(nameInput) {
+    nameInput.value = p.name || '';
+    if(!isGoogle) setTimeout(() => nameInput.focus(), 50);
+  }
+
+  const emailInput = $('#profileEmailInput');
+  if(emailInput) {
+    emailInput.value = p.email || '';
+    if(isGoogle) setTimeout(() => emailInput.focus(), 50);
+  }
+
+  const avatarInput = $('#profileAvatarInput');
+  if(avatarInput) avatarInput.value = p.avatar || '';
+
+  const colorDots = document.querySelectorAll('#profileColorPicker .color-dot');
+  colorDots.forEach(d => {
+    d.classList.toggle('on', d.dataset.color === (p.color || '#3b82f6'));
+  });
+
+  const delBtn = $('#profileModalDelete');
+  if(delBtn){
+    delBtn.style.display = (pid && pid !== 'personal') ? 'block' : 'none';
+  }
+
+  backdrop.classList.add('on');
+}
+
+function closeProfileModal(){
+  const backdrop = $('#profileModalBackdrop');
+  if(backdrop) backdrop.classList.remove('on');
+  profileModalTargetId = null;
+  profileModalSavedCb = null;
+}
+
+// Wire up Profile event handlers
+const pBtnEl = $('#profileTop');
+if(pBtnEl){
+  pBtnEl.setAttribute('aria-haspopup','dialog');
+  pBtnEl.setAttribute('aria-expanded','false');
+  pBtnEl.onclick = (e) => {
+    e.stopPropagation();
+    const pop = $('#profilePop');
+    setProfileOpen(!pop.classList.contains('on'));
+  };
+}
+
+const popBtnGoogle = $('#popBtnGoogle');
+if(popBtnGoogle){
+  popBtnGoogle.onclick = () => {
+    setProfileOpen(false);
+    openProfileModal(activeProfileId, true);
+  };
+}
+
+const btnNewProfile = $('#btnNewProfile');
+if(btnNewProfile){
+  btnNewProfile.onclick = () => {
+    setProfileOpen(false);
+    openProfileModal(null, false);
+  };
+}
+
+const btnEditProfile = $('#btnEditProfile');
+if(btnEditProfile){
+  btnEditProfile.onclick = () => {
+    setProfileOpen(false);
+    openProfileModal(activeProfileId, false);
+  };
+}
+
+const pModalClose = $('#profileModalClose');
+if(pModalClose) pModalClose.onclick = closeProfileModal;
+
+const pModalCancel = $('#profileModalCancel');
+if(pModalCancel) pModalCancel.onclick = closeProfileModal;
+
+const pColorPicker = $('#profileColorPicker');
+if(pColorPicker){
+  pColorPicker.querySelectorAll('.color-dot').forEach(dot => {
+    dot.onclick = () => {
+      pColorPicker.querySelectorAll('.color-dot').forEach(d => d.classList.remove('on'));
+      dot.classList.add('on');
+    };
+  });
+}
+
+const pModalSave = $('#profileModalSave');
+if(pModalSave){
+  pModalSave.onclick = async () => {
+    const nameInput = $('#profileNameInput');
+    const emailInput = $('#profileEmailInput');
+    const avatarInput = $('#profileAvatarInput');
+    const selColorDot = $('#profileColorPicker .color-dot.on');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    let avatar = avatarInput ? avatarInput.value.trim() : '';
+    const color = selColorDot ? selColorDot.dataset.color : '#3b82f6';
+
+    if(!name && !email){
+      toast('Please enter a profile name or email');
+      return;
+    }
+
+    if(!avatar && email.includes('@')){
+      avatar = `https://unavatar.io/${encodeURIComponent(email)}?fallback=false`;
+    }
+
+    const isNew = !profileModalTargetId;
+    const id = profileModalTargetId || ('prof_' + Date.now().toString(36));
+    const finalName = name || (email ? email.split('@')[0] : 'Profile');
+
+    const pRecord = {
+      id,
+      name: finalName,
+      email,
+      avatar,
+      color,
+      created_at: Math.floor(Date.now() / 1000)
+    };
+
+    try{
+      await tauriInvoke('profile_save', { profile: pRecord });
+      if(isNew){
+        await switchProfile(id);
+      } else {
+        await loadProfiles();
+      }
+      toast(isNew ? `Profile "${finalName}" created!` : `Profile "${finalName}" updated!`);
+      if(typeof profileModalSavedCb === 'function'){
+        profileModalSavedCb();
+      }
+    }catch(err){
+      toast('Error saving profile: ' + String(err));
+    }
+    closeProfileModal();
+  };
+}
+
+const pModalDel = $('#profileModalDelete');
+if(pModalDel){
+  pModalDel.onclick = async () => {
+    if(!profileModalTargetId || profileModalTargetId === 'personal') return;
+    try{
+      await tauriInvoke('profile_delete', { id: profileModalTargetId });
+      if(activeProfileId === profileModalTargetId){
+        await switchProfile('personal');
+      } else {
+        await loadProfiles();
+      }
+      toast('Profile deleted');
+    }catch(err){
+      toast('Error deleting profile: ' + String(err));
+    }
+    closeProfileModal();
+  };
+}
+
+addEventListener('resize', positionProfilePop);
+
 /* Close floating popovers on outside click */
 addEventListener('pointerdown', e => {
   const btn = $('#dlTop');
@@ -3602,7 +4050,28 @@ addEventListener('pointerdown', e => {
      && (!btn || (e.target !== btn && !btn.contains(e.target)))){
     setDownloadsOpen(false);
   }
+  const pBtn = $('#profileTop');
+  const pPop = $('#profilePop');
+  if(pPop && pPop.classList.contains('on') && !pPop.contains(e.target)
+     && (!pBtn || (e.target !== pBtn && !pBtn.contains(e.target)))){
+    setProfileOpen(false);
+  }
 });
+
+addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){
+    const pPop = $('#profilePop');
+    if(pPop && pPop.classList.contains('on')){
+      e.preventDefault();
+      setProfileOpen(false);
+    }
+    const bDrop = $('#profileModalBackdrop');
+    if(bDrop && bDrop.classList.contains('on')){
+      e.preventDefault();
+      closeProfileModal();
+    }
+  }
+}, true);
 
 document.querySelectorAll('.logo').forEach(i=>i.src=LOGO);
 {const fl=document.createElement('link');fl.rel='icon';fl.href=LOGO;document.head.appendChild(fl)}
@@ -3733,7 +4202,7 @@ function syncOnbVideo() {
 function showOnboarding(force = false, initialStep = 0) {
   if (!force) {
     try {
-      if (localStorage.getItem('false_onboarding_done') === 'true') {
+      if (localStorage.getItem('false_onboarding_done') === 'true' || (bootState && bootState.onboarding_done === 'true')) {
         return;
       }
     } catch(e) {}
@@ -3753,6 +4222,10 @@ function dismissOnboarding() {
   try {
     localStorage.setItem('false_onboarding_done', 'true');
   } catch(e) {}
+  try {
+    tauriInvoke('save_state', { key: 'onboarding_done', value: 'true' });
+  } catch(e) {}
+  if (bootState) bootState.onboarding_done = 'true';
   const stage = document.getElementById('onbStage');
   const panel = document.getElementById('onbPanel');
   if (panel) panel.classList.add('leave');
@@ -3900,9 +4373,9 @@ function setupOnboardingEvents() {
   const btnGoogle = document.getElementById('onbBtnGoogle');
   if (btnGoogle) {
     btnGoogle.onclick = () => {
-      // Login window opening disabled for now; will be implemented in a dedicated popup window later
-      toast('Account login will be enabled in a future update');
-      goToOnbStep(1);
+      openProfileModal(activeProfileId, true, () => {
+        goToOnbStep(1);
+      });
     };
   }
 
@@ -3943,6 +4416,7 @@ async function boot(){
   pal=paletteOf(THEMES[theme]);
   apply();applyCfg();
   tauriInvoke('adblock_set_enabled',{enabled:!!cfg.adblock});
+  await loadProfiles();
   await refreshBookmarks();
   await refreshHistory();
   renderBookmarksBar();

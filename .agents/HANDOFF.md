@@ -1,30 +1,28 @@
 # False Browser Development Handoff
 
 ## Executive Summary
-Completed Git installation, GitHub CLI setup, GitHub repository creation, public release deployment, and launched the official GitHub Pages landing page with an integrated changelog.
+Delivered **v0.1.1** release addressing user-reported onboarding reoccurrence bugs, introducing full multi-profile and Google account management, deploying intelligent tab sleeping (RAM idle unloader), instant cosmetic ad and cookie wall blocking, and generating distribution packages (`FalseSetup.exe` and `false-v0.1.1.flse`).
 
-## Completed Work & Deliverables
+## Key Changes in v0.1.1
+1. **Onboarding Persistence Fix**:
+   - Fixed the recurring onboarding popup across restarts by persisting `onboarding_done: 'true'` to SQLite `settings` table via `save_state` rather than volatile custom-protocol `localStorage`.
+   - Updated `hydrateState` and `restoreSession` in `crates/false-ui/ui/index.html` to reliably verify and sync state.
 
-1. **Git & GitHub CLI Tooling**:
-   - PortableGit installed to `%LOCALAPPDATA%\Programs\Git\cmd` and permanently configured in User PATH.
-   - GitHub CLI (`gh`) installed and authenticated with account `formerlyhonored`.
-   - Git Credential Manager configured globally.
+2. **Multi-Profile & Google Account Management**:
+   - Added `profiles` table to SQLite in `crates/false-ui/src/lib.rs` with automatic migration for default `personal` and `work` profiles.
+   - Migrated `bookmarks` and `history` tables to include `profile_id TEXT NOT NULL DEFAULT 'personal'` with indexes.
+   - Added Tauri commands: `profiles_list`, `profile_save`, `profile_delete`, `profile_set_active`, `profile_get_active`.
+   - Built UI Profile Switcher popover (`#profilePop`) and Profile Editor modal (`#profileModalBackdrop`) in `crates/false-ui/ui/index.html`.
+   - Supported linking Google account identity (name, email, Google avatar URL) with real-time UI updates to top toolbar avatar pill.
+   - Child webview freeze/unfreeze layering implemented via `freezePageForPopover()` to prevent native WebView2 clipping over HTML popovers.
 
-2. **GitHub Repository & Initial Release**:
-   - Repository: `https://github.com/formerlyhonored/false`
-   - Initial Commit: `11f995e` (root commit) + `3f5f824` (landing page & changelog)
-   - Release: `v0.1.0` published at `https://github.com/formerlyhonored/false/releases/tag/v0.1.0`
-   - Assets Attached:
-     - `FalseSetup.exe` (18.45 MB)
-     - `false-v0.1.0.flse` (7.05 MB)
+3. **Performance & Calming Blockers**:
+   - Tab sleeping sweep: Automatically sleeps background tabs after 5 minutes of idle inactivity, unloading native child webviews to conserve system RAM while preserving tab state and instant restore cards.
+   - Instant cosmetic blocker: Pure CSS and DOM `MutationObserver` injected via `init_script()` in `crates/false-ui/src/lib.rs` to purge ad slots (`ins.adsbygoogle`, `.ad-container`) and dismiss intrusive cookie consent overlays (`#onetrust-banner-sdk`, `.cookie-banner`, `.qc-cmp2-container`, `#didomi-host`) without network latency.
 
-3. **Live Landing Page & Changelog**:
-   - Live URL: **`https://formerlyhonored.github.io/false/`** (HTTP 200 OK)
-   - Styled following `minimalist-dark-ui` tokens (`#09090b`, `#121215`, subtle borders, tabular numbers).
-   - Embedded live `glacier-loop-2.webm` showcase window.
-   - Integrated `v0.1.0` release changelog timeline.
-   - Download CTAs directly linked to GitHub release artifacts.
-
-## Prioritized Next Steps
-- Implement any new UI features, browser extensions, or engine performance improvements requested by the user.
-- On each subsequent update, bump version (e.g., `v0.1.1`), run `build_package.ps1`, update the changelog in `docs/index.html`, and push to GitHub.
+4. **Release & Packaging**:
+   - Bumped version to `0.1.1` across `Cargo.toml`, `tauri.conf.json`, `index.html`, `installer.html`, `uninstaller.html`, and `installer_ui.rs`.
+   - Executed `build_package.ps1 -Version "0.1.1"` generating:
+     - `FalseSetup.exe` (18.5 MB)
+     - `false-v0.1.1.flse` (7.07 MB)
+   - Updated `versions/v0.1.1/README.md` with complete release notes.
