@@ -1105,6 +1105,65 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
 (()=>{
 const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),root=document.documentElement,RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
 
+/* ---- Fail-safe layer ----------------------------------------------------
+   UI is one script scope, so a single missing element or broken widget must
+   never abort startup. Bind through on()/onEv(), and run each independent
+   init block through section() so failures stay local and visible in logs. */
+let __booted = false;
+const __errbox = (() => {
+  let box = null;
+  const render = (msg) => {
+    try {
+      if (!box) {
+        box = document.createElement('div');
+        box.id = '__false_fatal';
+        Object.assign(box.style, {
+          position:'fixed', inset:'0', zIndex:'2147483647', display:'flex',
+          alignItems:'center', justifyContent:'center', background:'rgba(9,9,11,.94)',
+          color:'#f2f2f2', font:'13px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace',
+          padding:'24px', whiteSpace:'pre-wrap', WebkitAppRegion:'no-drag'
+        });
+        box.innerHTML = '<div style="max-width:820px;width:100%">' +
+          '<div style="color:#f87171;font-weight:700;margin-bottom:10px">False could not finish starting</div>' +
+          '<div id="__false_fatal_msg" style="color:#d4d4d8;max-height:60vh;overflow:auto"></div>' +
+          '<div style="color:#71717a;margin-top:14px;font-size:12px">Press Ctrl+C to copy this message.</div></div>';
+        document.body.appendChild(box);
+        addEventListener('keydown', (ev) => {
+          if (ev.ctrlKey && (ev.key || '').toLowerCase() === 'c') {
+            try { navigator.clipboard.writeText(box.textContent || ''); } catch (e) {}
+          }
+        });
+      }
+      const m = box.querySelector('#__false_fatal_msg');
+      m.textContent = (m.textContent ? m.textContent + '\n\n' : '') + String(msg);
+      box.style.display = 'flex';
+    } catch (e) {}
+  };
+  return render;
+})();
+function section(name, fn) {
+  try { return fn(); }
+  catch (e) { console.error('[false] section "' + name + '" failed:', e); return null; }
+}
+const on = (sel, handler) => {
+  const el = $(sel);
+  if (!el) { console.warn('[false] missing element ' + sel); return null; }
+  el.onclick = handler;
+  return el;
+};
+const onEv = (sel, event, handler) => {
+  const el = $(sel);
+  if (!el) { console.warn('[false] missing element ' + sel); return null; }
+  el.addEventListener(event, handler);
+  return el;
+};
+addEventListener('error', (e) => {
+  if (!__booted) __errbox((e && e.message ? e.message : 'Unknown startup error') + '\n' + (e && e.filename ? e.filename + ':' + e.lineno : ''));
+});
+addEventListener('unhandledrejection', (e) => {
+  if (!__booted) __errbox(String((e && e.reason && e.reason.message) || (e && e.reason) || 'Unhandled rejection during startup'));
+});
+
 /* Search Engines Registry */
 const ENGINES = {
   Google: { name: 'Google', icon: 'G', dom: 'google.com', search: q => `https://www.google.com/search?q=${encodeURIComponent(q)}` },
@@ -3461,21 +3520,24 @@ function doFind(backwards){
   });
 }
 
-$('#find-input').onkeydown=e=>{
-  if(e.key==='Enter')doFind(e.shiftKey);
-  else if(e.key==='Escape')toggleFindBar(false);
-};
-$('#find-prev').onclick=()=>doFind(true);
-$('#find-next').onclick=()=>doFind(false);
-$('#find-close').onclick=()=>toggleFindBar(false);
+section('find-bar', () => {
+  onEv('#find-input','keydown',e=>{
+    if(e.key==='Enter')doFind(e.shiftKey);
+    else if(e.key==='Escape')toggleFindBar(false);
+  });
+  on('#find-prev',()=>doFind(true));
+  on('#find-next',()=>doFind(false));
+  on('#find-close',()=>toggleFindBar(false));
+});
 
 /* Omni Address Input Events (Direct Website Links & URL Input) */
-$('#addr').onclick=e=>{
+section('omnibox', () => {
+on('#addr',e=>{
   if(e.target!==$('#sec')&&!e.target.closest('#sec')&&e.target!==$('#star')&&!e.target.closest('#star')&&!e.target.closest('#sec-pop')&&!e.target.closest('#omni-pop')){
     omni.focus();
     startOmniEdit(false);
   }
-};
+});
 
 omni.onkeydown=e=>{
   if(e.key==='ArrowDown'){
@@ -3531,14 +3593,14 @@ omni.onblur=()=>{
     stopOmniEdit();
   },200);
 };
+}); /* omnibox */
 
-$('#sec').onclick=e=>{e.stopPropagation();toggleSecPop()};
-$('#star').onclick=()=>toggleBookmark();
+section('toolbar', () => {
+on('#sec',e=>{e.stopPropagation();toggleSecPop()});
+on('#star',()=>toggleBookmark());
 const topStarEl=$('#topStar');if(topStarEl)topStarEl.onclick=()=>toggleBookmark();
-const newtabEl=$('#newtab');if(newtabEl)newtabEl.onclick=()=>addTab();
 const brandNewTab=$('#brandNewTab');if(brandNewTab)brandNewTab.onclick=()=>addTab();
-const topNewTab=$('#topNewTab');if(topNewTab)topNewTab.onclick=()=>addTab();
-strip.addEventListener('wheel',e=>{if(e.deltaY){strip.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
+if(strip)strip.addEventListener('wheel',e=>{if(e.deltaY){strip.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 
 /* Zoom indicator: shows when zoom != 100%, click resets */
 function updateZoomIndicator(){
@@ -3548,30 +3610,32 @@ function updateZoomIndicator(){
   zl.textContent=z+'%';
   zi.classList.toggle('on',z!==100);
 }
-$('#zoomIndicator').onclick=()=>{cfg.zoom=1;saveCfg();const t=cur();if(t&&t.url)tauriInvoke('set_web_zoom',{tabId:t.id,zoom:1});updateZoomIndicator();toast('Zoom reset to 100%')};
+on('#zoomIndicator',()=>{cfg.zoom=1;saveCfg();const t=cur();if(t&&t.url)tauriInvoke('set_web_zoom',{tabId:t.id,zoom:1});updateZoomIndicator();toast('Zoom reset to 100%')});
 updateZoomIndicator();
 
-$('#side').onclick=()=>{
+on('#side',()=>{
   app.classList.toggle('noside');
   setTimeout(updateBounds, 60);
   setTimeout(updateBounds, 420);
-};
-$('#reload').onclick=()=>{const t=cur();if(!t)return;if(t.url)navTo(t,t.url,false);else renderView()};
-$('#home').onclick=()=>{const t=cur();if(!t)return;navTo(t,'')};
-$('#back').onclick=()=>{const t=cur();if(t&&t.i>0){t.i--;navTo(t,t.h[t.i],false)}};
-$('#fwd').onclick=()=>{const t=cur();if(t&&t.i<t.h.length-1){t.i++;navTo(t,t.h[t.i],false)}};
-$('#bbarToggle').onclick=()=>{
+});
+on('#reload',()=>{const t=cur();if(!t)return;if(t.url)navTo(t,t.url,false);else renderView()});
+on('#home',()=>{const t=cur();if(!t)return;navTo(t,'')});
+on('#back',()=>{const t=cur();if(t&&t.i>0){t.i--;navTo(t,t.h[t.i],false)}});
+on('#fwd',()=>{const t=cur();if(t&&t.i<t.h.length-1){t.i++;navTo(t,t.h[t.i],false)}});
+on('#bbarToggle',()=>{
   cfg.bbar=!cfg.bbar;saveCfg();renderBookmarksBar();
   toast(cfg.bbar?'Bookmarks bar visible':'Bookmarks bar hidden');
-};
-$('#historyTop').onclick=openHistory;
-$('#setSide').onclick=$('#setTop').onclick=openSettings;
+});
+/* #historyTop no longer exists in the toolbar; history lives in the Main Menu. */
+on('#setSide',openSettings);
+on('#setTop',openSettings);
+}); /* toolbar */
 
 const TW=()=>{try{const w=window.__TAURI__&&window.__TAURI__.window;return w&&w.getCurrentWindow?w.getCurrentWindow():null}catch(e){return null}};
 async function syncMax(){const m=await tauriInvoke('is_maximized_window');const el=$('#wMax');if(el){el.classList.toggle('on',!!m);el.title=m?'Restore':'Maximize'}}
-$('#wMin').onclick=()=>tauriInvoke('minimize_window');
-$('#wMax').onclick=async()=>{await tauriInvoke('toggle_maximize_window');syncMax()};
-$('#wClose').onclick=async()=>{const r=await tauriInvoke('close_window');if(r===null){const w=TW();w?w.close():window.close()}};
+on('#wMin',()=>tauriInvoke('minimize_window'));
+on('#wMax',async()=>{await tauriInvoke('toggle_maximize_window');syncMax()});
+on('#wClose',async()=>{const r=await tauriInvoke('close_window');if(r===null){const w=TW();w?w.close():window.close()}});
 addEventListener('resize',syncMax);
 
 async function setZoom(z){
@@ -4153,8 +4217,8 @@ if(dlBtnEl){
     setDownloadsOpen(!dlPop.classList.contains('on'));
   };
 }
-$('#dlClear').onclick = () => { downloads = []; saveDownloads(); renderDownloads(); toast('Downloads cleared'); };
-$('#dlFolder').onclick = () => { tauriInvoke('open_downloads_folder').catch(()=>{ toast('Downloads folder'); }); };
+on('#dlClear', () => { downloads = []; saveDownloads(); renderDownloads(); toast('Downloads cleared'); });
+on('#dlFolder', () => { tauriInvoke('open_downloads_folder').catch(()=>{ toast('Downloads folder'); }); });
 addEventListener('resize', positionDownloadsPop);
 addEventListener('keydown', (e) => {
   if(e.key === 'Escape' && dlPop.classList.contains('on')){
@@ -4867,7 +4931,7 @@ const extOf=n=>{const m=/\.([a-z0-9]{1,5})$/i.exec(n||'');return m?m[1].toUpperC
 const ago=ts=>{if(!ts)return '';const s=(Date.now()-ts)/1000;if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+' min ago';if(s<86400)return Math.floor(s/3600)+' h ago';return new Date(ts).toLocaleDateString([], {month:'short',day:'numeric'})};
 const dlIcon=d=>`<span class="dx-ic" data-k="${extOf(d.name).slice(0,3)}">${esc(extOf(d.name).slice(0,4))}</span>`;
 const dlMeta=d=>[d.size,d.progress<100?Math.round(d.progress)+'%':'Done',ago(d.time)].filter(Boolean).join(' · ');
-async function revealDl(d){if(d&&d.path&&await tryInvoke('reveal_path',{path:d.path}))return;tauriInvoke('open_downloads_folder').catch(()=>toast('Downloads folder'))}
+async function revealDl(d){if(d&&d.path&&await tryInvoke('open_path',{path:d.path}))return;tauriInvoke('open_downloads_folder').catch(()=>toast('Downloads folder'))}
 const dlAct=(i,d)=>`<span class="dx-a"><button data-do="reveal" data-i="${i}" title="Show in folder" aria-label="Show in folder">${S(IC.open)}</button><button data-do="remove" data-i="${i}" title="Remove from list" aria-label="Remove from list">${S(IC.x)}</button></span>`;
 function dlBind(root){
   root.onclick=e=>{
