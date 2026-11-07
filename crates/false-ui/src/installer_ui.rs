@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -41,9 +41,39 @@ pub fn default_install_dir() -> PathBuf {
     local_app_data().join("Programs").join("False")
 }
 
+/// Validate a user-supplied install folder before it is interpolated into
+/// VBScript or passed to `reg`. Rejects shell/script metacharacters.
+fn validate_install_path(value: &str) -> Result<PathBuf, String> {
+    let trimmed = value.trim();
+    if trimmed.is_empty() {
+        return Err("Install folder is empty.".to_string());
+    }
+    for forbidden in ['%', '"', '\'', '\r', '\n', '\0', ';', '&', '|', '<', '>', '$', '`'] {
+        if trimmed.contains(forbidden) {
+            return Err(format!(
+                "Install folder cannot contain the character '{}'.",
+                forbidden
+            ));
+        }
+    }
+    let path = PathBuf::from(trimmed);
+    if !path.is_absolute() {
+        return Err("Install folder must be an absolute path.".to_string());
+    }
+    if path.parent().is_none() {
+        return Err("Refusing to install into a drive root.".to_string());
+    }
+    for component in path.components() {
+        if matches!(component, Component::ParentDir | Component::CurDir) {
+            return Err("Install folder cannot contain '.' or '..' components.".to_string());
+        }
+    }
+    Ok(path)
+}
+
 pub fn resolve_path(p: Option<String>) -> PathBuf {
     match p {
-        Some(s) if !s.trim().is_empty() && !s.contains('%') => PathBuf::from(s.trim()),
+        Some(s) if validate_install_path(&s).is_ok() => PathBuf::from(s.trim()),
         _ => default_install_dir(),
     }
 }
@@ -166,7 +196,7 @@ fn setup_registry(target_exe: &Path, install_dir: &Path, icon_path: &Path) {
     let uninstall_key = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\False";
     let entries = [
         ("DisplayName", "False Browser"),
-        ("DisplayVersion", "0.1.2"),
+        ("DisplayVersion", env!("CARGO_PKG_VERSION")),
         ("Publisher", "zaidi"),
         ("DisplayIcon", &format!("{},0", icon_str)),
         ("InstallLocation", &install_str),
@@ -210,7 +240,10 @@ pub async fn installer_run(
     set_default: Option<bool>,
 ) -> Result<(), String> {
     tokio::task::spawn_blocking(move || {
-        let install_dir = resolve_path(path);
+        let install_dir = match path.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
+            Some(value) => validate_install_path(value)?,
+            None => default_install_dir(),
+        };
 
         // Terminate any running instances so binaries are not locked
         let mut kill1 = Command::new("taskkill");

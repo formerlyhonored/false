@@ -4628,6 +4628,23 @@ function setupOnboardingEvents() {
   }
 }
 
+async function checkPendingPackage(){
+  try{
+    const pending = await tauriInvoke('get_pending_flse');
+    if(!pending) return;
+    const summary = `${pending.name} v${pending.version}\nPublisher: ${pending.author}\n\n${pending.description || 'No description.'}\n\nInstall this signed update?`;
+    if(!confirm(summary)){
+      await tauriInvoke('clear_pending_flse');
+      return;
+    }
+    const res = await tauriInvoke('apply_flse_update',{sourcePath:pending.path});
+    toast(res && res.message ? res.message : 'Update installed');
+    if(res && !res.requires_restart) setTimeout(()=>location.reload(),800);
+  }catch(e){
+    console.error('[false] pending package failed:', e);
+  }
+}
+
 async function boot(){
   try{
     await hydrateState();
@@ -4651,8 +4668,11 @@ async function boot(){
     syncOmni(cur(),true);
     setupOnboardingEvents();
     if(!onbDone) showOnboarding(true);
+    __booted = true;
+    await checkPendingPackage();
   }catch(err){
     console.error('Boot critical error:', err);
+    __errbox('Boot failed: ' + (err && err.message ? err.message : String(err)));
     if(!tabs.length) addTab();
   }
 }

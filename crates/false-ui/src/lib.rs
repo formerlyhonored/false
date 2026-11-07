@@ -1043,8 +1043,11 @@ fn builder_for(
 
     let mut builder = WebviewBuilder::new(label, WebviewUrl::External(url))
         .initialization_script(init_script())
-        .background_color(bg)
-        .devtools(true);
+        .background_color(bg);
+    #[cfg(any(debug_assertions, feature = "devtools"))]
+    {
+        builder = builder.devtools(true);
+    }
     if let Some(p) = proxy {
         builder = builder.proxy_url(p);
     }
@@ -1864,17 +1867,15 @@ async fn check_browser_update(endpoint: Option<String>) -> Result<UpdateCheckRes
         if local_manifest.exists() {
             local_manifest.to_string_lossy().to_string()
         } else {
-            "https://raw.githubusercontent.com/false/browser/main/dist/update.json".to_string()
+            "https://raw.githubusercontent.com/formerlyhonored/false/main/dist/update.json".to_string()
         }
     });
 
     let content = if target.starts_with("http://") || target.starts_with("https://") {
-        let script = format!(
-            r#"$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (Invoke-WebRequest -Uri '{}' -UseBasicParsing -TimeoutSec 6).Content"#,
-            target
-        );
+        let script = r#"$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (Invoke-WebRequest -Uri $env:FALSE_UPDATE_URL -UseBasicParsing -TimeoutSec 6).Content"#;
         let out = tokio::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", &script])
+            .args(["-NoProfile", "-Command", script])
+            .env("FALSE_UPDATE_URL", &target)
             .output()
             .await
             .map_err(|e| format!("Failed to reach update server: {}", e))?;
@@ -1921,13 +1922,11 @@ async fn apply_browser_update(source: String) -> Result<String, String> {
     let staged_exe = updates_dir.join("false-ui_new.exe");
 
     if source.starts_with("http://") || source.starts_with("https://") {
-        let script = format!(
-            r#"$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '{}' -OutFile '{}'"#,
-            source,
-            staged_exe.to_string_lossy().replace('\\', "/")
-        );
+        let script = r#"$ProgressPreference = 'SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri $env:FALSE_UPDATE_URL -OutFile $env:FALSE_UPDATE_OUT"#;
         let out = tokio::process::Command::new("powershell")
-            .args(["-NoProfile", "-Command", &script])
+            .args(["-NoProfile", "-Command", script])
+            .env("FALSE_UPDATE_URL", &source)
+            .env("FALSE_UPDATE_OUT", &staged_exe)
             .output()
             .await
             .map_err(|e| format!("Update download failed: {}", e))?;
@@ -1997,6 +1996,60 @@ async fn apply_flse_update(
     }
 
     Err("No package data or file path provided.".to_string())
+}
+
+static PENDING_FLSE: Mutex<Option<PathBuf>> = Mutex::new(None);
+
+/// Records a `.flse` passed on the command line. It is never applied until the
+/// user confirms the verified manifest in the UI.
+pub fn set_pending_package(path: PathBuf) {
+    if let Ok(mut slot) = PENDING_FLSE.lock() {
+        *slot = Some(path);
+    }
+}
+
+#[derive(Serialize)]
+pub struct PendingFlse {
+    pub path: String,
+    pub name: String,
+    pub version: String,
+    pub author: String,
+    pub description: String,
+    pub has_binary: bool,
+}
+
+/// Returns a verified preview of a command-line package without applying it.
+#[tauri::command]
+fn get_pending_flse() -> Option<PendingFlse> {
+    let path = PENDING_FLSE.lock().ok()?.clone()?;
+    match flse::preview_package_file(&path) {
+        Ok(manifest) => Some(PendingFlse {
+            path: path.to_string_lossy().to_string(),
+            name: manifest.name,
+            version: manifest.version,
+            author: manifest.author,
+            description: manifest.description,
+            has_binary: manifest.has_binary,
+        }),
+        Err(e) => {
+            log_debug(&format!(
+                "Ignoring pending package {}: {}",
+                path.display(),
+                e
+            ));
+            if let Ok(mut slot) = PENDING_FLSE.lock() {
+                *slot = None;
+            }
+            None
+        }
+    }
+}
+
+#[tauri::command]
+fn clear_pending_flse() {
+    if let Ok(mut slot) = PENDING_FLSE.lock() {
+        *slot = None;
+    }
 }
 
 #[tauri::command]
@@ -2342,6 +2395,8 @@ pub fn run() {
             apply_browser_update,
             apply_flse_update,
             export_flse_package,
+            get_pending_flse,
+            clear_pending_flse,
             get_package_info,
             detect_installed_browsers,
             import_browser_data,

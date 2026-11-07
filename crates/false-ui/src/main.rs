@@ -56,13 +56,13 @@ fn main() {
             return;
         }
 
-        // Check if an argument is a .flse file to auto-import before starting
+        // A .flse passed on the command line is only previewed. The UI asks for
+        // consent (and re-verifies the signature) before applying anything.
         for arg in &args[1..] {
             let p = std::path::Path::new(arg);
             if p.exists() && (arg.ends_with(".flse") || arg.ends_with(".zip")) {
-                if let Ok(bytes) = std::fs::read(p) {
-                    let _ = false_ui_lib::flse::apply_package_bytes(&bytes);
-                }
+                false_ui_lib::set_pending_package(p.to_path_buf());
+                break;
             }
         }
     }
