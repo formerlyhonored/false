@@ -774,7 +774,7 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
 .ctx-sp{width:14px;flex:none}
 
 /* ===== v3: address-bar buttons, extensions, quick tiles, bookmarks bar, downloads ===== */
-#setTop,#bbarToggle{display:none!important}
+#setTop,#bbarToggle,#historyTop{display:none!important}
 .addr .star{margin:0 2px 0 0}
 .addr .star.on{color:var(--ac)}
 .addr .mbtn{flex:none;width:32px;height:24px;margin-right:6px;border-radius:999px;display:grid;place-items:center;color:var(--dim);background:rgba(var(--w),.08);transition:background .15s,color .15s;cursor:pointer;-webkit-app-region:no-drag!important}
@@ -984,7 +984,7 @@ html.light .logo,html.light .fav-img.logo-img{filter:brightness(.28) saturate(1.
     <button class="ib" id="dlTop" aria-label="Downloads" title="Downloads"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5"/><path d="M5 19h14"/></svg></button>
     <button class="ib profile-btn" id="profileTop" aria-label="Profiles & Accounts" title="Profiles & Accounts"><span class="profile-avatar-pill" id="topProfileAvatar">P</span></button>
     <button class="ib" id="menuBtn" aria-label="Menu" title="Menu" aria-haspopup="menu"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
-    <button class="ib" id="historyTop" aria-label="History" title="History (Ctrl+H)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></button>
+    
     <button class="ib" id="setTop" aria-label="Settings" title="Settings (Ctrl+,)"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
   </div>
   <div class="load" id="load"><div class="load-beam"></div></div>
@@ -1114,6 +1114,13 @@ const ENGINES = {
   Ecosia: { name: 'Ecosia', icon: 'E', dom: 'ecosia.org', search: q => `https://www.ecosia.org/search?q=${encodeURIComponent(q)}` }
 };
 let activeEngine = 'Google';
+let activeProfileId = 'personal';
+let profilesList = [];
+let activeProfileRecord = null;
+let profileModalTargetId = null;
+let profileBusy = false;
+let profileWebviewHidden = false;
+let profileModalSavedCb = null;
 try {
   const saved = localStorage.getItem('false_engine');
   if(saved && ENGINES[saved]) activeEngine = saved;
@@ -3748,6 +3755,348 @@ function clearPageSnapshot(){
   }
 }
 
+/* ---------- Profile & Account Controller ---------- */
+
+async function loadProfiles(){
+  try{
+    const res = await tauriInvoke('profiles_list');
+    if(Array.isArray(res) && res.length) profilesList = res;
+    else profilesList = [{id:'personal', name:'Personal', email:'', avatar:'', color:'#3b82f6', created_at: Date.now()}];
+  }catch(e){
+    profilesList = [{id:'personal', name:'Personal', email:'', avatar:'', color:'#3b82f6', created_at: Date.now()}];
+  }
+
+  try{
+    activeProfileId = (await tauriInvoke('profile_get_active')) || 'personal';
+  }catch(e){
+    activeProfileId = 'personal';
+  }
+
+  activeProfileRecord = profilesList.find(p => p.id === activeProfileId) || profilesList[0];
+  renderProfileBadge();
+  renderProfilePop();
+}
+
+function renderProfileBadge(){
+  const avatarEl = $('#topProfileAvatar');
+  if(!avatarEl || !activeProfileRecord) return;
+  const col = activeProfileRecord.color || '#3b82f6';
+  avatarEl.style.setProperty('--profile-color', col);
+  avatarEl.style.backgroundColor = col;
+  if(activeProfileRecord.avatar && activeProfileRecord.avatar.startsWith('http')){
+    avatarEl.style.backgroundImage = `url("${activeProfileRecord.avatar}")`;
+    avatarEl.textContent = '';
+  } else {
+    avatarEl.style.backgroundImage = '';
+    avatarEl.textContent = (activeProfileRecord.name || 'P').trim().charAt(0).toUpperCase();
+  }
+}
+
+function positionProfilePop(){
+  const pop = $('#profilePop');
+  if(!pop) return;
+  const top = document.querySelector('.top');
+  const bbar = $('#bbar');
+  const topBottom = top ? top.getBoundingClientRect().bottom : 52;
+  const barBottom = (bbar && bbar.classList.contains('on'))
+    ? bbar.getBoundingClientRect().bottom
+    : topBottom;
+  pop.style.top = Math.max(56, Math.min(barBottom + 4, innerHeight - 140)) + 'px';
+  pop.style.right = '12px';
+}
+
+function renderProfilePop(){
+  const pop = $('#profilePop');
+  if(!pop || !activeProfileRecord) return;
+  const col = activeProfileRecord.color || '#3b82f6';
+
+  const popAvatar = $('#popProfileAvatar');
+  if(popAvatar){
+    popAvatar.style.setProperty('--profile-color', col);
+    popAvatar.style.backgroundColor = col;
+    if(activeProfileRecord.avatar && activeProfileRecord.avatar.startsWith('http')){
+      popAvatar.style.backgroundImage = `url("${activeProfileRecord.avatar}")`;
+      popAvatar.textContent = '';
+    } else {
+      popAvatar.style.backgroundImage = '';
+      popAvatar.textContent = (activeProfileRecord.name || 'P').trim().charAt(0).toUpperCase();
+    }
+  }
+
+  const nameEl = $('#popProfileName');
+  if(nameEl) nameEl.textContent = activeProfileRecord.name || 'Personal';
+
+  const emailEl = $('#popProfileEmail');
+  if(emailEl){
+    if(activeProfileRecord.email){
+      emailEl.innerHTML = `<span style="color:#10b981">&#x2713;</span> ${esc(activeProfileRecord.email)}`;
+    } else {
+      emailEl.textContent = 'Local Profile \u2022 Not synced';
+    }
+  }
+
+  const btnLabel = $('#popGoogleBtnLabel');
+  if(btnLabel){
+    btnLabel.textContent = activeProfileRecord.email ? 'Manage Google Account' : 'Connect Google Account';
+  }
+
+  const listEl = $('#profileList');
+  if(listEl){
+    listEl.innerHTML = profilesList.map(p => {
+      const isActive = p.id === activeProfileId;
+      const pColor = p.color || '#3b82f6';
+      return `
+        <div class="profile-item${isActive ? ' active' : ''}" data-pid="${esc(p.id)}">
+          <div class="profile-item-dot" style="background:${pColor}"></div>
+          <div class="profile-item-info">
+            <div class="profile-item-name">${esc(p.name)}</div>
+            <div class="profile-item-email">${esc(p.email || 'Local space')}</div>
+          </div>
+          <svg class="profile-item-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.profile-item').forEach(item => {
+      item.onclick = async () => {
+        const pid = item.dataset.pid;
+        if(pid && pid !== activeProfileId){
+          await switchProfile(pid);
+        }
+      };
+    });
+  }
+}
+
+async function switchProfile(pid){
+  activeProfileId = pid;
+  try{
+    await tauriInvoke('profile_set_active', { id: pid });
+  }catch(e){}
+  await loadProfiles();
+  await refreshBookmarks();
+  await refreshHistory();
+  setProfileOpen(false);
+  toast(`Switched to ${activeProfileRecord.name}`);
+}
+
+async function setProfileOpen(open){
+  const pop = $('#profilePop');
+  const btn = $('#profileTop');
+  if(!pop || profileBusy) return;
+  const isOpen = pop.classList.contains('on');
+  if(open === isOpen) return;
+  profileBusy = true;
+  try{
+    if(open){
+      if(typeof setDownloadsOpen === 'function') setDownloadsOpen(false);
+      renderProfilePop();
+      positionProfilePop();
+      await freezePageForPopover();
+      if(!profileWebviewHidden){
+        profileWebviewHidden = true;
+        await tauriInvoke('hide_webviews').catch(()=>{});
+      }
+      pop.classList.add('on');
+      if(btn){ btn.classList.add('on'); btn.setAttribute('aria-expanded','true'); }
+    } else {
+      pop.classList.remove('on');
+      if(btn){ btn.classList.remove('on'); btn.setAttribute('aria-expanded','false'); }
+      if(profileWebviewHidden){
+        profileWebviewHidden = false;
+        const t = cur();
+        if(!omniEditing && t && t.url && !t.page && !t.sleeping){
+          await tauriInvoke('show_webview',{
+            tabId:t.id,url:t.url,bounds:getWebBounds(),force:false,
+            background:THEMES[theme].bg
+          }).catch(()=>{});
+        }
+      }
+      clearPageSnapshot();
+    }
+  } finally {
+    profileBusy = false;
+  }
+}
+
+function openProfileModal(pid, isGoogle = false, onSaved = null){
+  const backdrop = $('#profileModalBackdrop');
+  if(!backdrop) return;
+  profileModalTargetId = pid || null;
+  profileModalSavedCb = onSaved;
+  const p = profilesList.find(x => x.id === pid) || {
+    id: 'profile_' + Date.now().toString(36),
+    name: isGoogle ? 'Google Account' : '',
+    email: '',
+    avatar: '',
+    color: '#3b82f6',
+    created_at: Math.floor(Date.now() / 1000)
+  };
+
+  const titleEl = $('#profileModalTitle');
+  if(titleEl) titleEl.textContent = isGoogle ? 'Connect Google Account' : (pid ? 'Edit Profile' : 'Add New Profile');
+
+  const nameInput = $('#profileNameInput');
+  if(nameInput) {
+    nameInput.value = p.name || '';
+    if(!isGoogle) setTimeout(() => nameInput.focus(), 50);
+  }
+
+  const emailInput = $('#profileEmailInput');
+  if(emailInput) {
+    emailInput.value = p.email || '';
+    if(isGoogle) setTimeout(() => emailInput.focus(), 50);
+  }
+
+  const avatarInput = $('#profileAvatarInput');
+  if(avatarInput) avatarInput.value = p.avatar || '';
+
+  const colorDots = document.querySelectorAll('#profileColorPicker .color-dot');
+  colorDots.forEach(d => {
+    d.classList.toggle('on', d.dataset.color === (p.color || '#3b82f6'));
+  });
+
+  const delBtn = $('#profileModalDelete');
+  if(delBtn){
+    delBtn.style.display = (pid && pid !== 'personal') ? 'block' : 'none';
+  }
+
+  backdrop.classList.add('on');
+}
+
+function closeProfileModal(){
+  const backdrop = $('#profileModalBackdrop');
+  if(backdrop) backdrop.classList.remove('on');
+  profileModalTargetId = null;
+  profileModalSavedCb = null;
+}
+
+// Wire up Profile event handlers
+const pBtnEl = $('#profileTop');
+if(pBtnEl){
+  pBtnEl.setAttribute('aria-haspopup','dialog');
+  pBtnEl.setAttribute('aria-expanded','false');
+  pBtnEl.onclick = (e) => {
+    e.stopPropagation();
+    const pop = $('#profilePop');
+    setProfileOpen(!pop.classList.contains('on'));
+  };
+}
+
+const popBtnGoogle = $('#popBtnGoogle');
+if(popBtnGoogle){
+  popBtnGoogle.onclick = () => {
+    setProfileOpen(false);
+    openProfileModal(activeProfileId, true);
+  };
+}
+
+const btnNewProfile = $('#btnNewProfile');
+if(btnNewProfile){
+  btnNewProfile.onclick = () => {
+    setProfileOpen(false);
+    openProfileModal(null, false);
+  };
+}
+
+const btnEditProfile = $('#btnEditProfile');
+if(btnEditProfile){
+  btnEditProfile.onclick = () => {
+    setProfileOpen(false);
+    openProfileModal(activeProfileId, false);
+  };
+}
+
+const pModalClose = $('#profileModalClose');
+if(pModalClose) pModalClose.onclick = closeProfileModal;
+
+const pModalCancel = $('#profileModalCancel');
+if(pModalCancel) pModalCancel.onclick = closeProfileModal;
+
+const pColorPicker = $('#profileColorPicker');
+if(pColorPicker){
+  pColorPicker.querySelectorAll('.color-dot').forEach(dot => {
+    dot.onclick = () => {
+      pColorPicker.querySelectorAll('.color-dot').forEach(d => d.classList.remove('on'));
+      dot.classList.add('on');
+    };
+  });
+}
+
+const pModalSave = $('#profileModalSave');
+if(pModalSave){
+  pModalSave.onclick = async () => {
+    const nameInput = $('#profileNameInput');
+    const emailInput = $('#profileEmailInput');
+    const avatarInput = $('#profileAvatarInput');
+    const selColorDot = $('#profileColorPicker .color-dot.on');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    let avatar = avatarInput ? avatarInput.value.trim() : '';
+    const color = selColorDot ? selColorDot.dataset.color : '#3b82f6';
+
+    if(!name && !email){
+      toast('Please enter a profile name or email');
+      return;
+    }
+
+    if(!avatar && email.includes('@')){
+      avatar = `https://unavatar.io/${encodeURIComponent(email)}?fallback=false`;
+    }
+
+    const isNew = !profileModalTargetId;
+    const id = profileModalTargetId || ('prof_' + Date.now().toString(36));
+    const finalName = name || (email ? email.split('@')[0] : 'Profile');
+
+    const pRecord = {
+      id,
+      name: finalName,
+      email,
+      avatar,
+      color,
+      created_at: Math.floor(Date.now() / 1000)
+    };
+
+    try{
+      await tauriInvoke('profile_save', { profile: pRecord });
+      if(isNew){
+        await switchProfile(id);
+      } else {
+        await loadProfiles();
+      }
+      toast(isNew ? `Profile "${finalName}" created!` : `Profile "${finalName}" updated!`);
+      if(typeof profileModalSavedCb === 'function'){
+        profileModalSavedCb();
+      }
+    }catch(err){
+      toast('Error saving profile: ' + String(err));
+    }
+    closeProfileModal();
+  };
+}
+
+const pModalDel = $('#profileModalDelete');
+if(pModalDel){
+  pModalDel.onclick = async () => {
+    if(!profileModalTargetId || profileModalTargetId === 'personal') return;
+    try{
+      await tauriInvoke('profile_delete', { id: profileModalTargetId });
+      if(activeProfileId === profileModalTargetId){
+        await switchProfile('personal');
+      } else {
+        await loadProfiles();
+      }
+      toast('Profile deleted');
+    }catch(err){
+      toast('Error deleting profile: ' + String(err));
+    }
+    closeProfileModal();
+  };
+}
+
+addEventListener('resize', positionProfilePop);
+
 function positionDownloadsPop(){
   if(!dlPop) return;
   const top = document.querySelector('.top');
@@ -4216,27 +4565,32 @@ function setupOnboardingEvents() {
 }
 
 async function boot(){
-  await hydrateState();
-  theme=THEMES[cfg.theme]?cfg.theme:'nocturne';cfg.theme=theme;
-  pal=paletteOf(THEMES[theme]);
-  apply();applyCfg();
-  tauriInvoke('adblock_set_enabled',{enabled:!!cfg.adblock});
-  await loadProfiles();
-  await refreshBookmarks();
-  await refreshHistory();
-  renderBookmarksBar();
-  const onbDone = !!localStorage.getItem('false_onboarding_done');
-  if(!onbDone){
-    try{localStorage.removeItem(SESSION_KEY)}catch(e){}
-    try{tauriInvoke('save_state',{key:'session',value:''})}catch(e){}
-    addTab();
-  } else if(!restoreSession()) {
-    addTab();
+  try{
+    await hydrateState();
+    theme=THEMES[cfg.theme]?cfg.theme:'nocturne';cfg.theme=theme;
+    pal=paletteOf(THEMES[theme]);
+    apply();applyCfg();
+    try{ tauriInvoke('adblock_set_enabled',{enabled:!!cfg.adblock}); }catch(e){}
+    try{ await loadProfiles(); }catch(e){ console.error('Profiles load error:', e); }
+    try{ await refreshBookmarks(); }catch(e){}
+    try{ await refreshHistory(); }catch(e){}
+    renderBookmarksBar();
+    const onbDone = !!localStorage.getItem('false_onboarding_done');
+    if(!onbDone){
+      try{localStorage.removeItem(SESSION_KEY)}catch(e){}
+      try{tauriInvoke('save_state',{key:'session',value:''})}catch(e){}
+      addTab();
+    } else if(!restoreSession()) {
+      addTab();
+    }
+    syncMax();startSleepSweep();
+    syncOmni(cur(),true);
+    setupOnboardingEvents();
+    if(!onbDone) showOnboarding(true);
+  }catch(err){
+    console.error('Boot critical error:', err);
+    if(!tabs.length) addTab();
   }
-  syncMax();startSleepSweep();
-  syncOmni(cur(),true);
-  setupOnboardingEvents();
-  if(!onbDone) showOnboarding(true);
 }
 boot();
 
