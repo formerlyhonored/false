@@ -29,6 +29,79 @@ pub(crate) fn data_dir() -> PathBuf {
     base.join("False")
 }
 
+/// Short deterministic hash used to keep profile folder names unique without
+/// letting user-controlled ids escape the profile root.
+fn short_hash(value: &str) -> String {
+    let mut hash: u64 = 0xcbf2_9ce4_8422_2325;
+    for byte in value.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    format!("{:08x}", (hash >> 32) as u32)
+}
+
+/// Directory that holds a profile's WebView2 cookies, cache, and local storage.
+///
+/// The display id is never used as a raw path component: unsafe characters are
+/// replaced and a hash suffix prevents collisions between sanitized ids.
+pub(crate) fn profile_storage_dir(id: &str) -> PathBuf {
+    let mut safe = String::with_capacity(id.len().min(48));
+    for ch in id.chars().take(48) {
+        if ch.is_ascii_alphanumeric() || ch == '-' || ch == '_' {
+            safe.push(ch);
+        } else {
+            safe.push('_');
+        }
+    }
+    let safe = if safe.is_empty() { "default" } else { &safe };
+    data_dir()
+        .join("profiles")
+        .join(format!("{}-{}", safe, short_hash(id)))
+}
+
+/// The profile whose storage the next tab webview should use.
+struct ActiveProfile {
+    id: RwLock<String>,
+}
+
+impl ActiveProfile {
+    fn new(id: String) -> Self {
+        Self {
+            id: RwLock::new(id),
+        }
+    }
+
+    fn get(&self) -> String {
+        self.id
+            .read()
+            .map(|s| s.clone())
+            .unwrap_or_else(|_| "personal".to_string())
+    }
+
+    fn set(&self, id: String) {
+        if let Ok(mut current) = self.id.write() {
+            *current = id;
+        }
+    }
+}
+
+fn load_active_profile(db: &Db) -> String {
+    db.conn
+        .lock()
+        .ok()
+        .and_then(|conn| {
+            conn.query_row(
+                "SELECT value FROM settings WHERE key='active_profile'",
+                [],
+                |row| row.get::<_, String>(0),
+            )
+            .optional()
+            .ok()
+            .flatten()
+        })
+        .unwrap_or_else(|| "personal".to_string())
+}
+
 fn log_path() -> PathBuf {
     data_dir().join("false.log")
 }
@@ -548,6 +621,7 @@ const BLOCK_HOSTS: &[&str] = &[
 #[allow(dead_code)]
 struct AdBlock {
     enabled: AtomicBool,
+    active: AtomicBool,
     blocked: AtomicU64,
     allowed: AtomicU64,
     allow: RwLock<HashSet<String>>,
@@ -560,6 +634,7 @@ impl AdBlock {
         let block: HashSet<String> = BLOCK_HOSTS.iter().map(|s| s.to_string()).collect();
         Self {
             enabled: AtomicBool::new(true),
+            active: AtomicBool::new(false),
             blocked: AtomicU64::new(0),
             allowed: AtomicU64::new(0),
             allow: RwLock::new(HashSet::new()),
@@ -571,6 +646,7 @@ impl AdBlock {
     fn empty() -> Self {
         Self {
             enabled: AtomicBool::new(false),
+            active: AtomicBool::new(false),
             blocked: AtomicU64::new(0),
             allowed: AtomicU64::new(0),
             allow: RwLock::new(HashSet::new()),
@@ -592,11 +668,16 @@ impl AdBlock {
             .unwrap_or_default();
         serde_json::json!({
             "enabled": self.enabled.load(Ordering::Relaxed),
+            "proxy_active": self.active.load(Ordering::Relaxed),
             "blocked": self.blocked.load(Ordering::Relaxed),
             "allowed": self.allowed.load(Ordering::Relaxed),
             "allow": allow,
             "recent": recent,
         })
+    }
+
+    fn set_proxy_active(&self, active: bool) {
+        self.active.store(active, Ordering::Relaxed);
     }
 
     fn is_blocked(&self, host: &str) -> bool {
@@ -820,6 +901,7 @@ fn start_proxy(ad: Arc<AdBlock>) -> Option<u16> {
     let listener = std::net::TcpListener::bind("127.0.0.1:0").ok()?;
     let port = listener.local_addr().ok()?.port();
     listener.set_nonblocking(true).ok()?;
+    let worker = ad.clone();
     std::thread::Builder::new()
         .name("false-adblock".into())
         .spawn(move || {
@@ -842,10 +924,11 @@ fn start_proxy(ad: Arc<AdBlock>) -> Option<u16> {
                     }
                 };
                 log_debug(&format!("adblock proxy listening on 127.0.0.1:{}", port));
+                worker.set_proxy_active(true);
                 loop {
                     match listener.accept().await {
                         Ok((stream, _)) => {
-                            let ad = ad.clone();
+                            let ad = worker.clone();
                             tokio::spawn(async move { handle_proxy_client(stream, ad).await });
                         }
                         Err(_) => tokio::time::sleep(Duration::from_millis(40)).await,
@@ -1041,9 +1124,17 @@ fn builder_for(
     let label = tab_label(tab_id);
     let app_handle = app.clone();
 
+    let profile = app
+        .try_state::<ActiveProfile>()
+        .map(|p| p.get())
+        .unwrap_or_else(|| "personal".to_string());
+    let storage = profile_storage_dir(&profile);
+    let _ = std::fs::create_dir_all(&storage);
+
     let mut builder = WebviewBuilder::new(label, WebviewUrl::External(url))
         .initialization_script(init_script())
-        .background_color(bg);
+        .background_color(bg)
+        .data_directory(storage);
     #[cfg(any(debug_assertions, feature = "devtools"))]
     {
         builder = builder.devtools(true);
@@ -1677,14 +1768,30 @@ fn profile_delete(db: State<'_, Db>, id: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn profile_set_active(db: State<'_, Db>, id: String) -> Result<(), String> {
-    let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
-    conn.execute(
-        "INSERT INTO settings(key, value) VALUES('active_profile', ?1)
-         ON CONFLICT(key) DO UPDATE SET value=excluded.value",
-        params![id],
-    )
-    .map_err(|e| e.to_string())?;
+fn profile_set_active(
+    app: AppHandle,
+    db: State<'_, Db>,
+    active: State<'_, ActiveProfile>,
+    id: String,
+) -> Result<(), String> {
+    {
+        let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
+        conn.execute(
+            "INSERT INTO settings(key, value) VALUES('active_profile', ?1)
+             ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            params![id],
+        )
+        .map_err(|e| e.to_string())?;
+    }
+
+    active.set(id.clone());
+
+    // Existing webviews are bound to the previous profile's data directory, so
+    // they cannot be reused. Close them; the UI reloads into the new profile.
+    for wv in tab_webviews(&app) {
+        let _ = wv.close();
+    }
+    let _ = app.emit("profile-changed", serde_json::json!({ "id": id }));
     Ok(())
 }
 
@@ -2185,10 +2292,20 @@ pub fn run() {
     let is_uninstaller = args.iter().any(|a| a == "--uninstaller") || exe_stem.contains("uninstall");
     let is_installer = !is_uninstaller && (args.iter().any(|a| a == "--installer" || a == "--setup") || exe_stem.contains("setup") || exe_stem.contains("installer"));
 
-    let (adblock, proxy_url) = if is_installer || is_uninstaller {
-        (Arc::new(AdBlock::empty()), String::new())
+    let adblock = Arc::new(if is_installer || is_uninstaller {
+        AdBlock::empty()
     } else {
-        (Arc::new(AdBlock::new()), String::new())
+        AdBlock::new()
+    });
+    // Start the filtering proxy before any tab webview is created. If the
+    // listener cannot start, tabs fall back to direct connections instead of
+    // failing to load: the UI reports network filtering as unavailable.
+    let proxy_url = if is_installer || is_uninstaller {
+        String::new()
+    } else {
+        start_proxy(adblock.clone())
+            .map(|port| format!("http://127.0.0.1:{}", port))
+            .unwrap_or_default()
     };
 
     let page = if is_uninstaller {
@@ -2291,9 +2408,15 @@ pub fn run() {
                 }
                 db
             };
+            let active_id = if is_installer || is_uninstaller {
+                "personal".to_string()
+            } else {
+                load_active_profile(&db)
+            };
             app.manage(db);
+            app.manage(ActiveProfile::new(active_id));
 
-            let mut builder = tauri::WebviewWindowBuilder::new(app, "main", start_url.clone())
+            let builder = tauri::WebviewWindowBuilder::new(app, "main", start_url.clone())
                 .title(title)
                 .inner_size(win_width, win_height)
                 .min_inner_size(if is_installer || is_uninstaller { 800.0 } else { 720.0 }, if is_installer || is_uninstaller { 500.0 } else { 480.0 })
@@ -2302,11 +2425,6 @@ pub fn run() {
                 .shadow(true)
                 .background_color(tauri::webview::Color(5, 5, 6, 255))
                 .center();
-            if !proxy_url.is_empty() {
-                if let Ok(url) = proxy_url.parse::<tauri::Url>() {
-                    builder = builder.proxy_url(url);
-                }
-            }
 
             let window = builder.build()?;
             if let Some(icon) = app.default_window_icon() {
@@ -2385,4 +2503,65 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running False browser");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn profile_storage_dirs_are_distinct_and_stay_under_the_profile_root() {
+        let root = data_dir().join("profiles");
+        let personal = profile_storage_dir("personal");
+        let work = profile_storage_dir("work");
+        assert_ne!(personal, work);
+        assert!(personal.starts_with(&root));
+        assert!(work.starts_with(&root));
+
+        // Sanitized ids with the same visible form must not collide.
+        assert_ne!(profile_storage_dir("a b"), profile_storage_dir("a_b"));
+    }
+
+    #[test]
+    fn profile_storage_dir_cannot_escape_the_profile_root() {
+        let root = data_dir().join("profiles");
+        for id in [
+            "../../evil",
+            "..\\..\\evil",
+            "C:/Windows/System32",
+            "CON",
+            "a/b/c",
+            "a:b",
+            "",
+        ] {
+            let dir = profile_storage_dir(id);
+            assert!(dir.starts_with(&root), "escaped for id {:?}: {:?}", id, dir);
+            let leaf = dir.file_name().unwrap().to_string_lossy().to_string();
+            assert!(!leaf.contains('/'), "separator in leaf for {:?}", id);
+            assert!(!leaf.contains('\\'), "separator in leaf for {:?}", id);
+            assert!(!leaf.contains(':'), "stream in leaf for {:?}", id);
+        }
+    }
+
+    #[test]
+    fn domain_matching_respects_label_boundaries() {
+        assert!(domain_match("doubleclick.net", "doubleclick.net"));
+        assert!(domain_match("ad.doubleclick.net", "doubleclick.net"));
+        assert!(!domain_match("notdoubleclick.net", "doubleclick.net"));
+        assert!(!domain_match("doubleclick.net.evil.example", "doubleclick.net"));
+        assert_eq!(normalize_host("Example.COM:443"), "example.com");
+        assert_eq!(normalize_host("[::1]:8080"), "::1");
+    }
+
+    #[test]
+    fn adblock_allow_rule_overrides_block_rule() {
+        let ad = AdBlock::new();
+        assert!(ad.is_blocked("ads.doubleclick.net"));
+        if let Ok(mut allow) = ad.allow.write() {
+            allow.insert("doubleclick.net".to_string());
+        }
+        assert!(!ad.is_blocked("ads.doubleclick.net"));
+        ad.enabled.store(false, Ordering::Relaxed);
+        assert!(!ad.is_blocked("other.example"));
+    }
 }

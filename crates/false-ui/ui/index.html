@@ -2847,7 +2847,12 @@ async function refreshAdblockUI(){
   const info=await tauriInvoke('adblock_info');
   const stats=vc.querySelector('#adStats');
   if(!info){if(stats)stats.textContent='Unavailable';return}
-  if(stats)stats.innerHTML=`<b>${Number(info.blocked||0).toLocaleString()}</b> requests blocked · ${Number(info.allowed||0).toLocaleString()} allowed`;
+  if(stats){
+    const note=!info.proxy_active
+      ? ' · <span style="color:#d08770">network filtering unavailable</span>'
+      : (info.enabled ? '' : ' · <span style="color:#d08770">filtering paused</span>');
+    stats.innerHTML=`<b>${Number(info.blocked||0).toLocaleString()}</b> requests blocked · ${Number(info.allowed||0).toLocaleString()} allowed${note}`;
+  }
   const recent=vc.querySelector('#adRecent');
   if(recent){
     const r=info.recent||[];
@@ -3944,11 +3949,13 @@ async function switchProfile(pid){
   try{
     await tauriInvoke('profile_set_active', { id: pid });
   }catch(e){}
-  await loadProfiles();
-  await refreshBookmarks();
-  await refreshHistory();
-  setProfileOpen(false);
-  toast(`Switched to ${activeProfileRecord.name}`);
+  // Cookies, cache, and localStorage are per profile, so existing tabs cannot
+  // carry over. Drop the session and reload into a clean profile.
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
+  try{ await tauriInvoke('save_state',{key:'session',value:''}); }catch(e){}
+  const rec=(profiles||[]).find(p=>p.id===pid)||activeProfileRecord;
+  toast(`Switching to ${rec&&rec.name?rec.name:'profile'}…`);
+  setTimeout(()=>location.reload(),400);
 }
 
 async function setProfileOpen(open){
