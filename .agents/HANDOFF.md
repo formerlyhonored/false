@@ -1,25 +1,26 @@
 # False Browser Development Handoff
 
 ## Executive Summary
-Delivered **v0.1.2** release upgrading the frontend with the user-provided UI: native Main Menu with full keyboard shortcut bindings, native Webview context menus, Extensions dock popover (`#extBtn`), omnibar address bookmark star (`#star`), and updated quick-link glass tiles, while retaining complete multi-profile and Google account support.
+Delivered **v0.1.3** release integrating the user-provided UI (`index (2).html`): Music Island player, Profiles & Accounts management, and drag-and-drop `.flse` package updates in Settings. Eliminated frontend crash on startup, removed `#historyTop` clock button from the topbar, guarded all top-level DOM bindings against null dereferences, stopped active tab reloads on click, and enforced strict pre-flight guardrail checks via `scripts/check-frontend.mjs`.
 
-## Key Changes in v0.1.2
-1. **Frontend Architecture & Navigation Overhaul**:
-   - Integrated the user's updated UI (`crates/false-ui/ui/index.html`).
-   - Implemented native Main Menu (`.app-menu`, `#menuBtn`, `#setSide`) providing clean access to tabs, windows, private windows, history, bookmarks, downloads, zoom controls, print, full-screen, find, reader view, devtools, and profiles.
-   - Built native context menus (`.tab-menu.ctx`) for links, images, selected text, and background page navigation.
-   - Added Extensions dock popover (`#extBtn`) listing active/installed extensions.
-   - Added instant bookmark star (`#star`) in the address bar.
+## Key Changes in v0.1.3
+1. **Frontend UI Integration (`c:\Users\zaidi\Downloads\index (2).html`)**:
+   - Integrated full UI with Music Island mini-player, Profiles & Accounts manager, and clean dropdown menu.
+   - Removed the History clock icon from the topbar header per user request.
+   - Guarded every top-level DOM binding against missing elements so independent sections fail locally rather than halting the entire shell script.
+   - Added startup compatibility functions (`loadProfiles`, `renderProfileBadge`, `renderProfilePop`) wired to `refreshProfUI()` and backend profile commands.
+   - Converted optional backend commands to graceful `tryInvoke` fallbacks.
+   - Fixed onboarding loop by persisting `onboarding_done` in backend state via `tauriInvoke('save_state', ...)` as well as `localStorage`.
 
-2. **Feature & State Continuity**:
-   - Retained multi-profile management and Google account integration (`#profileTop`, `#profilePop`, `#profileModalBackdrop`).
-   - Retained profile-scoped SQLite bookmarks and history queries (`profileId: activeProfileId`).
-   - Retained SQLite persistent onboarding state to permanently prevent recurring startup popups.
-   - Retained intelligent tab sleeping and cosmetic ad & cookie wall blocking.
+2. **Tab Stability & Refresh Prevention**:
+   - In `makeTab(t)` and `activate(id, force = false)`: clicking an already active tab is a strict no-op (`if (t.id === active && !t.sleeping) return;`). Clicking active tabs no longer causes reloads, flashes, or stutters.
 
-3. **Release & Packaging**:
-   - Bumped version to `0.1.2` across `crates/false-ui/Cargo.toml`, `tauri.conf.json`, `index.html`, `installer_ui.rs`, `flse.rs`, `false-installer/Cargo.toml`, and installer HTML templates.
-   - Executed `build_package.ps1 -Version "0.1.2"` generating:
-     - `FalseSetup.exe` (Standalone Windows setup)
-     - `false-v0.1.2.flse` (Modular update package)
-   - Created release specification in `versions/v0.1.2/README.md`.
+3. **Settings `.flse` Drag-and-Drop**:
+   - Implemented `#flseDropZone` drag-and-drop handler in `false://settings` supporting both `.flse` and `.zip` update bundles.
+   - Added window-level drag-and-drop listener that delegates dropped `.flse` files directly to `apply_flse_update`.
+
+4. **Quality & Release Build**:
+   - Verified `node scripts/check-frontend.mjs`: 0 errors.
+   - Verified `cargo clippy -p false-ui --all-targets --no-deps -- -D warnings`: 0 warnings.
+   - Built release package with `build_package.ps1 -Version "0.1.3"`.
+   - Updated GitHub Release `v0.1.3` with signed `FalseSetup.exe`, `false.exe`, and `false-v0.1.3.flse`.
