@@ -10,6 +10,11 @@ $Root = $PSScriptRoot
 $UiDir = Join-Path $Root "crates\false-ui\ui"
 $RustSource = Join-Path $Root "crates\false-ui\src\lib.rs"
 
+# crates/false-ui/Cargo.toml is the single version source; propagate it before
+# the checker and Tauri build read their metadata.
+node (Join-Path $Root "scripts\sync-version.mjs")
+if ($LASTEXITCODE -ne 0) { throw "Version sync failed" }
+
 if (-not $SkipChecks) {
     Write-Host "=== [1/4] Frontend guardrail ===" -ForegroundColor Cyan
     node (Join-Path $Root "scripts\check-frontend.mjs")

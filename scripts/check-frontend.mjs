@@ -183,6 +183,27 @@ if (pkgVersion) {
       err(`${rel}: version ${found} does not match crates/false-ui/Cargo.toml (${pkgVersion})`);
     }
   }
+
+  // Static version labels in the shipped HTML.
+  const htmlVersion = /Version\s+(\d+\.\d+\.\d+)/.exec(html)?.[1];
+  if (htmlVersion && htmlVersion !== pkgVersion) {
+    err(`${relIndex}: version ${htmlVersion} does not match crates/false-ui/Cargo.toml (${pkgVersion})`);
+  }
+  const fallbackVersion = /current_version\s*:\s*['"](\d+\.\d+\.\d+)['"]/.exec(html)?.[1];
+  if (fallbackVersion && fallbackVersion !== pkgVersion) {
+    err(`${relIndex}: update fallback ${fallbackVersion} does not match crates/false-ui/Cargo.toml (${pkgVersion})`);
+  }
+  for (const rel of [
+    'crates/false-ui/ui/installer.html',
+    'crates/false-ui/ui/uninstaller.html',
+  ]) {
+    const p = path.resolve(root, rel);
+    if (!fs.existsSync(p)) continue;
+    const found = /Version\s+(\d+\.\d+\.\d+)/.exec(fs.readFileSync(p, 'utf8'))?.[1];
+    if (found && found !== pkgVersion) {
+      err(`${rel}: version ${found} does not match crates/false-ui/Cargo.toml (${pkgVersion})`);
+    }
+  }
   // Hard-coded fallbacks/defaults in Rust sources.
   for (const rel of ['crates/false-ui/src/main.rs', 'crates/false-ui/src/flse.rs', 'crates/false-ui/src/installer_ui.rs']) {
     const p = path.resolve(root, rel);
