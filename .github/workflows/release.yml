@@ -1,0 +1,106 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+
+      - name: Tauri CLI
+        run: npm install -g @tauri-apps/cli@^2
+
+      - name: Format
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy -p false-ui --all-targets --no-deps -- -D warnings
+
+      - name: Tests
+        run: cargo test -p false-ui --lib
+
+      - name: Version and frontend guardrails
+        run: |
+          node scripts/sync-version.mjs --check
+          node scripts/check-frontend.mjs
+
+      - name: Build and sign the package
+        env:
+          SIGNING_PEM: ${{ secrets.FALSE_SIGNING_KEY_PEM }}
+        run: |
+          if (-not $env:SIGNING_PEM) {
+            throw "FALSE_SIGNING_KEY_PEM is not set. Add the Ed25519 private key as a repository secret."
+          }
+          $keyPath = Join-Path $env:RUNNER_TEMP "update-signing.key.pem"
+          [System.IO.File]::WriteAllText($keyPath, $env:SIGNING_PEM, (New-Object System.Text.UTF8Encoding($false)))
+          $env:FALSE_SIGNING_KEY = $keyPath
+          ./build_package.ps1 -SkipChecks -Bundle
+          if ($LASTEXITCODE -ne 0) { throw "Packaging failed" }
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: false-windows
+          if-no-files-found: error
+          path: |
+            FalseSetup.exe
+            False_*-setup.exe
+            false-v*.flse
+
+      - name: Check the tag matches the crate version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          $cargoToml = Get-Content crates/false-ui/Cargo.toml -Raw
+          $version = [regex]::Match($cargoToml, '(?m)^version\s*=\s*"([^"]+)"').Groups[1].Value
+          if ($env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Tag $env:GITHUB_REF_NAME does not match crates/false-ui/Cargo.toml ($version)"
+          }
+
+      - name: Publish draft release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $cargoToml = Get-Content crates/false-ui/Cargo.toml -Raw
+          $version = [regex]::Match($cargoToml, '(?m)^version\s*=\s*"([^"]+)"').Groups[1].Value
+          $tag = "v$version"
+          $flse = "false-$tag.flse"
+          $nsis = "False_${version}_x64-setup.exe"
+
+          gh release view $tag --json tagName *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag FalseSetup.exe $nsis $flse --clobber
+            exit $LASTEXITCODE
+          }
+
+          $notes = "versions/$tag/README.md"
+          if (Test-Path $notes) {
+            gh release create $tag FalseSetup.exe $nsis $flse --draft --title "False $tag" --notes-file $notes
+          } else {
+            gh release create $tag FalseSetup.exe $nsis $flse --draft --title "False $tag" --generate-notes
+          }

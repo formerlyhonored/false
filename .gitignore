@@ -5,6 +5,7 @@ crates/false-ui/gen/
 
 # Binary distributions & package outputs (these belong on GitHub Releases)
 FalseSetup.exe
+/False_*-setup.exe
 /false.exe
 *.flse
 *.zip

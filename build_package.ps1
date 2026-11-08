@@ -1,8 +1,9 @@
 param(
-    [string]$Version = "0.1.3",
+    [string]$Version = "",
     [string]$ReleaseNotes = "False browser stable update: fixed startup crash, signed packages, hardened paths",
     [switch]$SkipUIBuild,
-    [switch]$SkipChecks
+    [switch]$SkipChecks,
+    [switch]$Bundle
 )
 
 $ErrorActionPreference = "Stop"
@@ -14,6 +15,13 @@ $RustSource = Join-Path $Root "crates\false-ui\src\lib.rs"
 # the checker and Tauri build read their metadata.
 node (Join-Path $Root "scripts\sync-version.mjs")
 if ($LASTEXITCODE -ne 0) { throw "Version sync failed" }
+
+if (-not $Version) {
+    $cargoToml = Get-Content (Join-Path $Root "crates\false-ui\Cargo.toml") -Raw
+    $m = [regex]::Match($cargoToml, '(?m)^version\s*=\s*"([^"]+)"')
+    if (-not $m.Success) { throw "Could not read the version from crates/false-ui/Cargo.toml" }
+    $Version = $m.Groups[1].Value
+}
 
 if (-not $SkipChecks) {
     Write-Host "=== [1/4] Frontend guardrail ===" -ForegroundColor Cyan
@@ -93,4 +101,30 @@ Move-Item $tempZip $flseFile -Force
 Remove-Item $stage -Recurse -Force
 
 Write-Host "=== All artifacts built & ready for distribution ===" -ForegroundColor Green
+
+if ($Bundle) {
+    Write-Host "=== Building the NSIS installer with tauri build ===" -ForegroundColor Cyan
+    $tauri = Get-Command tauri -ErrorAction SilentlyContinue
+    if (-not $tauri) {
+        $tauri = Get-Command tauri.cmd -ErrorAction SilentlyContinue
+    }
+    if (-not $tauri) {
+        throw "tauri CLI not found. Install it with: npm install -g @tauri-apps/cli@^2"
+    }
+    Push-Location (Join-Path $Root "crates\false-ui")
+    try {
+        & $tauri.Source build --bundles nsis
+        if ($LASTEXITCODE -ne 0) { throw "tauri build failed" }
+    } finally {
+        Pop-Location
+    }
+    $nsis = Join-Path $Root "target\release\bundle\nsis\False_${Version}_x64-setup.exe"
+    if (-not (Test-Path $nsis)) {
+        throw "NSIS installer not found: $nsis"
+    }
+    $setupOut = Join-Path $Root "False_${Version}_x64-setup.exe"
+    Copy-Item $nsis $setupOut -Force
+    Write-Host "NSIS installer: $setupOut" -ForegroundColor Green
+}
+
 Get-Item $setupDest, $flseFile | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize
