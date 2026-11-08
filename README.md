@@ -2,110 +2,139 @@
 
 # false
 
-**A fast, quiet, distraction-free web browser built in Rust.**
+**A Windows browser shell built on Tauri 2 and WebView2, with a custom Rust backend and a hand-built HTML/CSS/JS interface.**
 
-[![Version](https://img.shields.io/badge/version-0.1.3-blue?style=flat-square&color=2563eb)](https://github.com/formerlyhonored/false/releases/latest)
-[![Rust](https://img.shields.io/badge/built%20with-Rust-orange?style=flat-square&logo=rust&color=d97706)](https://www.rust-lang.org/)
-[![License](https://img.shields.io/badge/license-Proprietary-gray?style=flat-square&color=3f3f46)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-blue?style=flat-square&logo=windows&color=0284c7)](https://microsoft.com/windows)
-
+[![Version](https://img.shields.io/badge/version-0.1.3-blue?style=flat-square)](https://github.com/formerlyhonored/false/releases/latest)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%20%2F%2011-0078d4?style=flat-square)](https://github.com/formerlyhonored/false/releases/latest)
+[![License](https://img.shields.io/badge/license-Proprietary-6b7280?style=flat-square)](LICENSE)
 
 </div>
 
 ---
 
-## Overview
+## Status
 
-**False** is a modern, privacy-respecting browser that pairs a custom pure-Rust rendering workbench with a fine-tuned, hardware-accelerated WebView2 engine. Designed from the ground up to eliminate browser bloat, unwanted distractions, and noisy background services.
+False is a small, actively developed browser for Windows 10 and 11. The current
+release is **v0.1.3**.
 
-### Key Highlights
+> v0.1.2 shipped a frontend that crashed during startup. It is superseded and
+> should not be installed. See the [v0.1.3 release notes](versions/v0.1.3/README.md).
 
-- **Blazingly Fast**: Zero unnecessary network proxy hops, full HTTP/2, HTTP/3 (QUIC), and TLS 1.3 0-RTT support.
-- **Hardware-Accelerated Rendering**: Out-of-process canvas rasterization, GPU-accelerated 2D canvas, and multi-threaded raster pipelines.
-- **Minimalist Dark UI**: Layered dark palettes (`#09090b`, `#121215`), high-density zero-bloat layouts, and subtle 1px border styling.
-- **Instant Standalone Installer**: Single GUI binary (`FalseSetup.exe`) with native Windows shortcuts, Control Panel registration, and zero console popups.
-- **Modular Update Packages (`.flse`)**: Seamless, self-contained update packages allowing instant runtime updates.
-- **Discord Rich Presence**: Optional status display showing your active browsing activity without compromising privacy or leaking visited URLs.
+False renders web pages with the installed WebView2 runtime. The Rust backend
+manages windows, tabs, storage, local filtering, and signed updates. It is not a
+from-scratch HTML engine; the `false-*` crates outside `false-ui` are an
+experimental rendering workbench, described below.
 
----
+## Features
 
-## Architecture
+- **Tabs** with session restore, background unloading ("sleeping" tabs), mute,
+  pin, drag reorder, and a compact tab strip.
+- **Omnibox** with URL/search handling, autocomplete, and keyboard shortcuts.
+- **Bookmarks and history** stored locally in SQLite, scoped per profile.
+- **Profiles** with separate history, bookmarks, and browser storage.
+- **Reader view**, find-in-page, zoom controls, print, and a downloads panel.
+- **Ad and tracker filtering** through a local HTTP/HTTPS proxy with per-site
+  allow rules and live counters.
+- **Themes** with a dark-first, high-density interface.
+- **Discord Rich Presence** (optional; it does not send visited URLs).
+- **Signed updates** delivered as `.flse` packages. See [Updates](#updates).
 
-```mermaid
-flowchart TD
-    subgraph UI ["False Shell & Presentation Layer"]
-        A["Native Shell (Tauri 2.0 / Rust)"] --> B["Minimalist Dark Shell (HTML / CSS / JS)"]
-        B --> C["Omnibox & Tab Strip Management"]
-        B --> D["Settings, Bookmarks & History Engine"]
-    end
+## Install
 
-    subgraph Core ["False Core Services"]
-        E["SQLite Local Storage Engine"]
-        F["Discord Rich Presence Daemon"]
-        G[".flse Update Package Manager"]
-    end
+Download the latest installer from the
+[Releases page](https://github.com/formerlyhonored/false/releases/latest).
 
-    subgraph Web ["Web Rendering Engines"]
-        H["Accelerated Chromium Core (WebView2)"]
-        I["Custom Pure-Rust Engine Workbench"]
-    end
+1. Run `FalseSetup.exe`.
+2. Choose an install folder and shortcut options.
+3. The installer registers False in the Start Menu, Desktop, and Windows
+   "Apps & features".
 
-    A --> E
-    A --> F
-    A --> G
-    A --> H
-    A --> I
-```
+Release artifacts:
 
----
-
-## Crates & Repository Structure
-
-| Crate | Purpose |
+| File | Purpose |
 | :--- | :--- |
-| [`crates/false-ui`](crates/false-ui) | Tauri 2.0 native window shell, GUI installer/uninstaller, and frontend workbench |
-| [`crates/false-core`](crates/false-core) | Core data structures, configuration state, and session persistence |
-| [`crates/false-net`](crates/false-net) | High-throughput asynchronous networking, connection pooling, and DNS caching |
-| [`crates/false-dom`](crates/false-dom) | Pure-Rust HTML parser and DOM tree construction |
-| [`crates/false-css`](crates/false-css) | CSS tokenization, parser, cascade computation, and rule matching |
-| [`crates/false-layout`](crates/false-layout) | Box tree layout generator, flexbox/block formatting context calculator |
-| [`crates/false-render`](crates/false-render) | Software and hardware rendering rasterizer |
-| [`crates/false-engine`](crates/false-engine) | Unified browser engine orchestrating layout, rendering, and DOM updates |
+| `FalseSetup.exe` | GUI installer / uninstaller |
+| `false.exe` | Standalone executable |
+| `false-v0.1.3.flse` | Signed update package |
 
----
+## Build from source
 
-## Getting Started
+Requirements:
 
-### Installation
-
-Download the latest signed installer from the [Releases page](https://github.com/formerlyhonored/false/releases/latest):
-
-1. Run **`FalseSetup.exe`**.
-2. Customize your install directory or desktop shortcut options.
-3. Click **Install**. False will be registered in your Windows Start Menu, Desktop, and Control Panel automatically.
-
-### Manual Build from Source
-
-Prerequisites:
-- [Rust](https://rustup.rs/) (edition 2021+)
-- Windows 10 / 11 with WebView2 Runtime
+- Rust 1.80 or newer (edition 2021)
+- Node.js 20 or newer (frontend checks and manifest signing)
+- Windows 10/11 with the WebView2 runtime
 
 ```powershell
-# Clone the repository
 git clone https://github.com/formerlyhonored/false.git
 cd false
-
-# Build the complete release package
 .\build_package.ps1 -Version "0.1.3"
 ```
 
-The build script will produce:
-- `FalseSetup.exe`: Standalone GUI installer
-- `false-v0.1.3.flse`: Signed modular update package
+The script runs the frontend guardrail, Clippy, a release build, signs the
+package manifest, and verifies the staged UI before producing `FalseSetup.exe`
+and `false-v0.1.3.flse`.
 
----
+Useful commands:
+
+```powershell
+node scripts/check-frontend.mjs          # DOM/command/version checks
+cargo test -p false-ui --lib             # package and security tests
+cargo clippy -p false-ui --all-targets --no-deps -- -D warnings
+```
+
+## Updates
+
+Every `.flse` package contains `manifest.json` and `manifest.sig`. The signature
+is verified against a public key compiled into the binary before any file is
+extracted, and unsigned or tampered packages are rejected. Opening a `.flse`
+only previews the verified publisher, version, and description; the user must
+confirm before it is applied.
+
+The release public key is committed at
+[`crates/false-ui/keys/update-signing.pub`](crates/false-ui/keys/update-signing.pub).
+Its SHA-256 fingerprint is:
+
+```
+52:e1:13:c6:57:5c:37:b4:f3:42:d3:fc:8d:0f:78:a1:dd:6e:9a:43:37:1d:a1:98:6d:78:17:32:e1:d4:45:8b
+```
+
+The private key is never committed. Maintainers sign with:
+
+```powershell
+node scripts/sign-manifest.mjs <manifest.json> <manifest.sig>
+node scripts/verify-manifest.mjs <manifest.json> <manifest.sig>
+```
+
+## Repository layout
+
+```
+crates/
+  false-ui/          Shipping app: Tauri shell, installer, signed updates, UI
+  false-core/        Experimental engine: data structures and config
+  false-net/         Experimental engine: networking helpers
+  false-dom/         Experimental engine: HTML parser and DOM
+  false-css/         Experimental engine: CSS parser and cascade
+  false-layout/      Experimental engine: box layout
+  false-render/      Experimental engine: rasterizer
+  false-engine/      Experimental engine: pipeline coordinating the above
+  false-installer/   Command-line installer helper
+scripts/             Frontend checks and release signing tools
+versions/            Per-release notes
+website/             Static project page
+```
+
+The `false-ui` crate is the browser users run. The other `false-*` crates are a
+separate, incomplete rendering workbench used for experiments and the
+`false_engine_render` command. They are not the engine behind normal browsing.
+
+## Repository hygiene
+
+- Release artifacts are published on GitHub Releases, not committed.
+- `Cargo.lock` is tracked because this is an application workspace.
+- Dead legacy code is removed from the current tree; history remains in Git.
 
 ## License
 
 Copyright &copy; 2026 **zaidi**. All rights reserved.
-See [LICENSE](LICENSE) for full legal terms.
+See [LICENSE](LICENSE) for the full terms.
