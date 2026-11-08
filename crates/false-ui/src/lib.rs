@@ -1197,6 +1197,36 @@ fn builder_for(
                 );
             }
         })
+        .on_download({
+            let app = app_handle.clone();
+            move |_wv, event| {
+                match event {
+                    tauri::webview::DownloadEvent::Requested { url, destination } => {
+                        let _ = app.emit(
+                            "download-started",
+                            serde_json::json!({
+                                "id": tab_id,
+                                "url": url.to_string(),
+                                "path": destination.to_string_lossy(),
+                            }),
+                        );
+                    }
+                    tauri::webview::DownloadEvent::Finished { url, path, success } => {
+                        let _ = app.emit(
+                            "download-finished",
+                            serde_json::json!({
+                                "id": tab_id,
+                                "url": url.to_string(),
+                                "path": path.map(|p| p.to_string_lossy().to_string()),
+                                "success": success,
+                            }),
+                        );
+                    }
+                    _ => {}
+                }
+                true
+            }
+        })
 }
 
 // ---------------------------------------------------------------------------
@@ -1291,10 +1321,10 @@ fn close_webview(app: AppHandle, tab_id: u32) -> Result<(), String> {
 
 #[tauri::command]
 fn reload_webview(app: AppHandle, tab_id: u32) -> Result<(), String> {
-    if let Some(wv) = app.get_webview(&tab_label(tab_id)) {
-        let _ = wv.reload();
-    }
-    Ok(())
+    let wv = app
+        .get_webview(&tab_label(tab_id))
+        .ok_or_else(|| "webview not found".to_string())?;
+    wv.reload().map_err(|e| e.to_string())
 }
 
 #[tauri::command]

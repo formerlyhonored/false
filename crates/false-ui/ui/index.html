@@ -2080,6 +2080,32 @@ function setupTauriListeners() {
       }
     });
 
+    window.__TAURI__.event.listen('download-started', event => {
+      const p=event.payload||{};
+      const name=(p.path||p.url||'').split(/[\\/]/).pop()||'download';
+      if(downloads.some(d=>d.url===p.url&&d.progress<100))return;
+      downloads.unshift({name,size:'',status:'Downloading',progress:0,path:p.path||'',url:p.url||'',time:Date.now()});
+      if(downloads.length>50)downloads.pop();
+      saveDownloads();renderDownloads();
+      toast(`Downloading ${name}`);
+    });
+
+    window.__TAURI__.event.listen('download-finished', event => {
+      const p=event.payload||{};
+      let d=downloads.find(x=>x.url===p.url&&x.progress<100)||downloads.find(x=>x.url===p.url);
+      if(!d){
+        const name=(p.path||p.url||'').split(/[\\/]/).pop()||'download';
+        d={name,size:'',status:'',progress:100,path:p.path||'',url:p.url||'',time:Date.now()};
+        downloads.unshift(d);
+        if(downloads.length>50)downloads.pop();
+      }
+      d.progress=100;
+      d.status=p.success?'Completed':'Failed';
+      if(p.path)d.path=p.path;
+      saveDownloads();renderDownloads();
+      toast(p.success?`Downloaded ${d.name}`:'Download failed');
+    });
+
     window.__TAURI__.event.listen('false-key', event => {
       const key=event.payload&&event.payload.key;
       if(key)handleKey(key);
@@ -2314,7 +2340,7 @@ function openTabMenu(e, tabId){
       const act=btn.dataset.act;
       menu.classList.remove('on');
       if(act==='pin'){pinTab(t)}
-      else if(act==='reload'){if(t.id===active)$('#reload').click();else if(t.url)await tauriInvoke('reload_webview',{tabId:t.id})}
+      else if(act==='reload'){if(t.id===active)$('#reload').click();else if(t.url){try{await tauriInvoke('reload_webview',{tabId:t.id})}catch(e){await tauriInvoke('show_webview',{tabId:t.id,url:t.url,bounds:getWebBounds(),force:true,background:THEMES[theme].bg,keepOthers:true}).catch(()=>{})}}}
       else if(act==='dup'){addTab(t.url,{title:t.title})}
       else if(act==='sleep'){
         if(t.sleeping){activate(t.id)}
