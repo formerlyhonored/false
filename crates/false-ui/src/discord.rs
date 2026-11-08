@@ -234,7 +234,10 @@ fn run_rpc_loop(cfg: DiscordConfig) {
                                 }
 
                                 if let Err(err) = client.set_activity(act) {
-                                    crate::log_debug(&format!("Discord RPC heartbeat error: {}", err));
+                                    crate::log_debug(&format!(
+                                        "Discord RPC heartbeat error: {}",
+                                        err
+                                    ));
                                     RPC_RUNNING.store(false, Ordering::Relaxed);
                                     let _ = client.close();
                                     break;

@@ -1,6 +1,6 @@
+pub mod browser_import;
 pub mod discord;
 pub mod flse;
-pub mod browser_import;
 pub mod installer_ui;
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
@@ -464,10 +464,22 @@ fn apply_schema(conn: &Connection) -> rusqlite::Result<()> {
         );
         "#,
     )?;
-    let _ = conn.execute("ALTER TABLE history ADD COLUMN profile_id TEXT NOT NULL DEFAULT 'personal'", []);
-    let _ = conn.execute("ALTER TABLE bookmarks ADD COLUMN profile_id TEXT NOT NULL DEFAULT 'personal'", []);
-    let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_history_profile ON history(profile_id)", []);
-    let _ = conn.execute("CREATE INDEX IF NOT EXISTS idx_bookmarks_profile ON bookmarks(profile_id)", []);
+    let _ = conn.execute(
+        "ALTER TABLE history ADD COLUMN profile_id TEXT NOT NULL DEFAULT 'personal'",
+        [],
+    );
+    let _ = conn.execute(
+        "ALTER TABLE bookmarks ADD COLUMN profile_id TEXT NOT NULL DEFAULT 'personal'",
+        [],
+    );
+    let _ = conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_history_profile ON history(profile_id)",
+        [],
+    );
+    let _ = conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_bookmarks_profile ON bookmarks(profile_id)",
+        [],
+    );
     Ok(())
 }
 
@@ -790,7 +802,6 @@ fn header_host(head: &str) -> Option<String> {
 
 #[allow(dead_code)]
 async fn handle_proxy_client(mut client: TcpStream, ad: Arc<AdBlock>) {
-
     let _ = client.set_nodelay(true);
     let head = match read_head(&mut client).await {
         Ok(h) => h,
@@ -807,7 +818,11 @@ async fn handle_proxy_client(mut client: TcpStream, ad: Arc<AdBlock>) {
     let tail = &head[header_end..];
     let head_text = String::from_utf8_lossy(head_bytes).to_string();
 
-    let mut first_line = head_text.split("\r\n").next().unwrap_or("").split_whitespace();
+    let mut first_line = head_text
+        .split("\r\n")
+        .next()
+        .unwrap_or("")
+        .split_whitespace();
     let method = first_line.next().unwrap_or("").to_string();
     let target = first_line.next().unwrap_or("").to_string();
     let version = first_line.next().unwrap_or("HTTP/1.1").to_string();
@@ -882,10 +897,7 @@ async fn handle_proxy_client(mut client: TcpStream, ad: Arc<AdBlock>) {
     } else {
         target
     };
-    let rest = head_text
-        .split_once("\r\n")
-        .map(|(_, r)| r)
-        .unwrap_or("");
+    let rest = head_text.split_once("\r\n").map(|(_, r)| r).unwrap_or("");
     let request = format!("{} {} {}\r\n{}", method, path, version, rest);
     if upstream.write_all(request.as_bytes()).await.is_err() {
         return;
@@ -1083,7 +1095,8 @@ fn init_script() -> &'static str {
 // ---------------------------------------------------------------------------
 
 fn main_window(app: &AppHandle) -> Result<tauri::Window, String> {
-    app.get_window("main").ok_or_else(|| "main window not found".into())
+    app.get_window("main")
+        .ok_or_else(|| "main window not found".into())
 }
 
 /// Child webviews only (the UI itself is the `main` webview).
@@ -1161,10 +1174,7 @@ fn builder_for(
                 // sentinel origin which we cancel, emitting the key to the shell.
                 const KEY_PREFIX: &str = "https://false.invalid/__false/key/";
                 if let Some(key) = u.strip_prefix(KEY_PREFIX) {
-                    let _ = app.emit(
-                        "false-key",
-                        serde_json::json!({ "key": key.to_string() }),
-                    );
+                    let _ = app.emit("false-key", serde_json::json!({ "key": key.to_string() }));
                     return false;
                 }
                 // Live URL channel for single-page apps (also cancelled).
@@ -1684,7 +1694,11 @@ fn bookmark_toggle(
 }
 
 #[tauri::command]
-fn bookmark_is_set(db: State<'_, Db>, url: String, profile_id: Option<String>) -> Result<bool, String> {
+fn bookmark_is_set(
+    db: State<'_, Db>,
+    url: String,
+    profile_id: Option<String>,
+) -> Result<bool, String> {
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
     let prof = profile_id.unwrap_or_default();
     let found: Option<i64> = conn
@@ -1699,7 +1713,10 @@ fn bookmark_is_set(db: State<'_, Db>, url: String, profile_id: Option<String>) -
 }
 
 #[tauri::command]
-fn bookmarks_list(db: State<'_, Db>, profile_id: Option<String>) -> Result<Vec<BookmarkEntry>, String> {
+fn bookmarks_list(
+    db: State<'_, Db>,
+    profile_id: Option<String>,
+) -> Result<Vec<BookmarkEntry>, String> {
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
     let prof = profile_id.unwrap_or_default();
     let mut stmt = conn
@@ -1829,7 +1846,11 @@ fn profile_set_active(
 fn profile_get_active(db: State<'_, Db>) -> Result<String, String> {
     let conn = db.conn.lock().map_err(|_| "database lock".to_string())?;
     let active: Option<String> = conn
-        .query_row("SELECT value FROM settings WHERE key='active_profile'", [], |r| r.get(0))
+        .query_row(
+            "SELECT value FROM settings WHERE key='active_profile'",
+            [],
+            |r| r.get(0),
+        )
         .optional()
         .map_err(|e| e.to_string())?;
     Ok(active.unwrap_or_else(|| "personal".into()))
@@ -1975,9 +1996,19 @@ pub struct UpdateCheckResult {
 }
 
 fn semver_compare(v1: &str, v2: &str) -> i32 {
-    let clean = |s: &str| s.trim_start_matches('v').trim_start_matches('V').to_string();
-    let parts1: Vec<u64> = clean(v1).split('.').filter_map(|p| p.parse().ok()).collect();
-    let parts2: Vec<u64> = clean(v2).split('.').filter_map(|p| p.parse().ok()).collect();
+    let clean = |s: &str| {
+        s.trim_start_matches('v')
+            .trim_start_matches('V')
+            .to_string()
+    };
+    let parts1: Vec<u64> = clean(v1)
+        .split('.')
+        .filter_map(|p| p.parse().ok())
+        .collect();
+    let parts2: Vec<u64> = clean(v2)
+        .split('.')
+        .filter_map(|p| p.parse().ok())
+        .collect();
     let len = std::cmp::max(parts1.len(), parts2.len());
     for i in 0..len {
         let p1 = parts1.get(i).copied().unwrap_or(0);
@@ -2004,7 +2035,8 @@ async fn check_browser_update(endpoint: Option<String>) -> Result<UpdateCheckRes
         if local_manifest.exists() {
             local_manifest.to_string_lossy().to_string()
         } else {
-            "https://raw.githubusercontent.com/formerlyhonored/false/main/dist/update.json".to_string()
+            "https://raw.githubusercontent.com/formerlyhonored/false/main/dist/update.json"
+                .to_string()
         }
     });
 
@@ -2035,9 +2067,21 @@ async fn check_browser_update(endpoint: Option<String>) -> Result<UpdateCheckRes
     let parsed: serde_json::Value = serde_json::from_str(&content)
         .map_err(|e| format!("Invalid update manifest JSON: {}", e))?;
 
-    let latest = parsed.get("version").and_then(|v| v.as_str()).unwrap_or(&current).to_string();
-    let notes = parsed.get("notes").and_then(|n| n.as_str()).unwrap_or("Performance improvements and fixes.").to_string();
-    let download_url = parsed.get("download_url").and_then(|u| u.as_str()).unwrap_or("").to_string();
+    let latest = parsed
+        .get("version")
+        .and_then(|v| v.as_str())
+        .unwrap_or(&current)
+        .to_string();
+    let notes = parsed
+        .get("notes")
+        .and_then(|n| n.as_str())
+        .unwrap_or("Performance improvements and fixes.")
+        .to_string();
+    let download_url = parsed
+        .get("download_url")
+        .and_then(|u| u.as_str())
+        .unwrap_or("")
+        .to_string();
 
     let is_newer = semver_compare(&latest, &current) > 0;
 
@@ -2076,8 +2120,8 @@ async fn apply_flse_update(
         if !status.success() {
             return Err("Failed to download the signed update package.".to_string());
         }
-        let bytes = std::fs::read(&target)
-            .map_err(|e| format!("Cannot read downloaded package: {}", e))?;
+        let bytes =
+            std::fs::read(&target).map_err(|e| format!("Cannot read downloaded package: {}", e))?;
         let _ = std::fs::remove_file(&target);
         return flse::apply_package_bytes(&bytes);
     }
@@ -2101,7 +2145,8 @@ async fn apply_flse_update(
         if !p.exists() {
             return Err("Specified .flse package path does not exist.".to_string());
         }
-        let bytes = std::fs::read(&p).map_err(|e| format!("Failed to read {}: {}", p.display(), e))?;
+        let bytes =
+            std::fs::read(&p).map_err(|e| format!("Failed to read {}: {}", p.display(), e))?;
         return flse::apply_package_bytes(&bytes);
     }
 
@@ -2179,7 +2224,10 @@ async fn export_flse_package(
     };
 
     flse::create_package(&version, &description, false, &target_path)?;
-    Ok(format!("Package exported successfully to: {}", target_path.display()))
+    Ok(format!(
+        "Package exported successfully to: {}",
+        target_path.display()
+    ))
 }
 
 #[tauri::command]
@@ -2208,7 +2256,10 @@ fn detect_installed_browsers() -> Vec<browser_import::InstalledBrowser> {
 }
 
 #[tauri::command]
-fn import_browser_data(browser_ids: Vec<String>, db: State<Db>) -> Result<browser_import::ImportResult, String> {
+fn import_browser_data(
+    browser_ids: Vec<String>,
+    db: State<Db>,
+) -> Result<browser_import::ImportResult, String> {
     let conn = db.conn.lock().map_err(|e| e.to_string())?;
     Ok(browser_import::import_from_browsers(&browser_ids, &conn))
 }
@@ -2234,7 +2285,11 @@ pub struct EngineRenderResponse {
 }
 
 #[tauri::command]
-fn false_engine_render(html: String, width: u32, height: u32) -> Result<EngineRenderResponse, String> {
+fn false_engine_render(
+    html: String,
+    width: u32,
+    height: u32,
+) -> Result<EngineRenderResponse, String> {
     let start = std::time::Instant::now();
     let output = false_engine::Engine::render(&html, width.max(100), height.max(100));
     let elapsed = start.elapsed().as_secs_f64() * 1000.0;
@@ -2319,8 +2374,12 @@ pub fn run() {
         .and_then(|p| p.file_stem().map(|s| s.to_string_lossy().to_lowercase()))
         .unwrap_or_default();
 
-    let is_uninstaller = args.iter().any(|a| a == "--uninstaller") || exe_stem.contains("uninstall");
-    let is_installer = !is_uninstaller && (args.iter().any(|a| a == "--installer" || a == "--setup") || exe_stem.contains("setup") || exe_stem.contains("installer"));
+    let is_uninstaller =
+        args.iter().any(|a| a == "--uninstaller") || exe_stem.contains("uninstall");
+    let is_installer = !is_uninstaller
+        && (args.iter().any(|a| a == "--installer" || a == "--setup")
+            || exe_stem.contains("setup")
+            || exe_stem.contains("installer"));
 
     let adblock = Arc::new(if is_installer || is_uninstaller {
         AdBlock::empty()
@@ -2449,7 +2508,18 @@ pub fn run() {
             let builder = tauri::WebviewWindowBuilder::new(app, "main", start_url.clone())
                 .title(title)
                 .inner_size(win_width, win_height)
-                .min_inner_size(if is_installer || is_uninstaller { 800.0 } else { 720.0 }, if is_installer || is_uninstaller { 500.0 } else { 480.0 })
+                .min_inner_size(
+                    if is_installer || is_uninstaller {
+                        800.0
+                    } else {
+                        720.0
+                    },
+                    if is_installer || is_uninstaller {
+                        500.0
+                    } else {
+                        480.0
+                    },
+                )
                 .resizable(true)
                 .decorations(false)
                 .shadow(true)
@@ -2578,7 +2648,10 @@ mod tests {
         assert!(domain_match("doubleclick.net", "doubleclick.net"));
         assert!(domain_match("ad.doubleclick.net", "doubleclick.net"));
         assert!(!domain_match("notdoubleclick.net", "doubleclick.net"));
-        assert!(!domain_match("doubleclick.net.evil.example", "doubleclick.net"));
+        assert!(!domain_match(
+            "doubleclick.net.evil.example",
+            "doubleclick.net"
+        ));
         assert_eq!(normalize_host("Example.COM:443"), "example.com");
         assert_eq!(normalize_host("[::1]:8080"), "::1");
     }

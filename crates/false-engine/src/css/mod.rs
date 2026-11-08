@@ -7,9 +7,24 @@ pub struct Color {
 }
 
 impl Color {
-    pub const WHITE: Color = Color { r: 255, g: 255, b: 255, a: 255 };
-    pub const BLACK: Color = Color { r: 0, g: 0, b: 0, a: 255 };
-    pub const TRANSPARENT: Color = Color { r: 0, g: 0, b: 0, a: 0 };
+    pub const WHITE: Color = Color {
+        r: 255,
+        g: 255,
+        b: 255,
+        a: 255,
+    };
+    pub const BLACK: Color = Color {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 255,
+    };
+    pub const TRANSPARENT: Color = Color {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0,
+    };
 
     pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
         Self { r, g, b, a }
@@ -20,15 +35,33 @@ impl Color {
         if s == "transparent" {
             return Some(Self::TRANSPARENT);
         }
-        if s == "black" { return Some(Self::BLACK); }
-        if s == "white" { return Some(Self::WHITE); }
-        if s == "red" { return Some(Color::new(235, 75, 75, 255)); }
-        if s == "green" { return Some(Color::new(75, 185, 95, 255)); }
-        if s == "blue" { return Some(Color::new(75, 135, 245, 255)); }
-        if s == "yellow" { return Some(Color::new(245, 215, 65, 255)); }
-        if s == "gray" || s == "grey" { return Some(Color::new(140, 145, 155, 255)); }
-        if s == "orange" { return Some(Color::new(245, 145, 65, 255)); }
-        if s == "purple" { return Some(Color::new(175, 95, 245, 255)); }
+        if s == "black" {
+            return Some(Self::BLACK);
+        }
+        if s == "white" {
+            return Some(Self::WHITE);
+        }
+        if s == "red" {
+            return Some(Color::new(235, 75, 75, 255));
+        }
+        if s == "green" {
+            return Some(Color::new(75, 185, 95, 255));
+        }
+        if s == "blue" {
+            return Some(Color::new(75, 135, 245, 255));
+        }
+        if s == "yellow" {
+            return Some(Color::new(245, 215, 65, 255));
+        }
+        if s == "gray" || s == "grey" {
+            return Some(Color::new(140, 145, 155, 255));
+        }
+        if s == "orange" {
+            return Some(Color::new(245, 145, 65, 255));
+        }
+        if s == "purple" {
+            return Some(Color::new(175, 95, 245, 255));
+        }
 
         if s.starts_with('#') {
             let hex = &s[1..];
@@ -383,7 +416,10 @@ impl CssParser {
     }
 
     fn parse_value(&mut self) -> Value {
-        let raw = self.consume_while(|c| c != ';' && c != '}').trim().to_string();
+        let raw = self
+            .consume_while(|c| c != ';' && c != '}')
+            .trim()
+            .to_string();
 
         if let Some(color) = Color::parse(&raw) {
             return Value::ColorValue(color);

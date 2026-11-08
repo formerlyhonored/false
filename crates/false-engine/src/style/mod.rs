@@ -120,8 +120,9 @@ fn compute_styles(node: &Node, specified: &PropertyMap) -> ComputedStyle {
     // Default display depending on element tag
     if let Some(tag) = node.tag_name() {
         match tag {
-            "html" | "body" | "div" | "header" | "footer" | "main" | "section" | "article" | "p"
-            | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "ul" | "ol" | "li" | "form" | "nav" => {
+            "html" | "body" | "div" | "header" | "footer" | "main" | "section" | "article"
+            | "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "ul" | "ol" | "li" | "form"
+            | "nav" => {
                 style.display = Display::Block;
             }
             "head" | "script" | "style" | "meta" | "title" | "link" => {
@@ -145,7 +146,10 @@ fn compute_styles(node: &Node, specified: &PropertyMap) -> ComputedStyle {
     if let Some(Value::ColorValue(c)) = specified.get("color") {
         style.color = *c;
     }
-    if let Some(Value::ColorValue(c)) = specified.get("background-color").or_else(|| specified.get("background")) {
+    if let Some(Value::ColorValue(c)) = specified
+        .get("background-color")
+        .or_else(|| specified.get("background"))
+    {
         style.background_color = *c;
     }
 
@@ -161,10 +165,18 @@ fn compute_styles(node: &Node, specified: &PropertyMap) -> ComputedStyle {
         style.margin_bottom = px;
         style.margin_left = px;
     }
-    if let Some(v) = specified.get("margin-top") { style.margin_top = v.to_px(); }
-    if let Some(v) = specified.get("margin-right") { style.margin_right = v.to_px(); }
-    if let Some(v) = specified.get("margin-bottom") { style.margin_bottom = v.to_px(); }
-    if let Some(v) = specified.get("margin-left") { style.margin_left = v.to_px(); }
+    if let Some(v) = specified.get("margin-top") {
+        style.margin_top = v.to_px();
+    }
+    if let Some(v) = specified.get("margin-right") {
+        style.margin_right = v.to_px();
+    }
+    if let Some(v) = specified.get("margin-bottom") {
+        style.margin_bottom = v.to_px();
+    }
+    if let Some(v) = specified.get("margin-left") {
+        style.margin_left = v.to_px();
+    }
 
     // Padding
     if let Some(v) = specified.get("padding") {
@@ -174,19 +186,37 @@ fn compute_styles(node: &Node, specified: &PropertyMap) -> ComputedStyle {
         style.padding_bottom = px;
         style.padding_left = px;
     }
-    if let Some(v) = specified.get("padding-top") { style.padding_top = v.to_px(); }
-    if let Some(v) = specified.get("padding-right") { style.padding_right = v.to_px(); }
-    if let Some(v) = specified.get("padding-bottom") { style.padding_bottom = v.to_px(); }
-    if let Some(v) = specified.get("padding-left") { style.padding_left = v.to_px(); }
+    if let Some(v) = specified.get("padding-top") {
+        style.padding_top = v.to_px();
+    }
+    if let Some(v) = specified.get("padding-right") {
+        style.padding_right = v.to_px();
+    }
+    if let Some(v) = specified.get("padding-bottom") {
+        style.padding_bottom = v.to_px();
+    }
+    if let Some(v) = specified.get("padding-left") {
+        style.padding_left = v.to_px();
+    }
 
     // Borders
-    if let Some(v) = specified.get("border-width") { style.border_width = v.to_px(); }
-    if let Some(Value::ColorValue(c)) = specified.get("border-color") { style.border_color = *c; }
-    if let Some(v) = specified.get("border-radius") { style.border_radius = v.to_px(); }
+    if let Some(v) = specified.get("border-width") {
+        style.border_width = v.to_px();
+    }
+    if let Some(Value::ColorValue(c)) = specified.get("border-color") {
+        style.border_color = *c;
+    }
+    if let Some(v) = specified.get("border-radius") {
+        style.border_radius = v.to_px();
+    }
 
     // Dimensions
-    if let Some(v) = specified.get("width") { style.width = Some(v.to_px()); }
-    if let Some(v) = specified.get("height") { style.height = Some(v.to_px()); }
+    if let Some(v) = specified.get("width") {
+        style.width = Some(v.to_px());
+    }
+    if let Some(v) = specified.get("height") {
+        style.height = Some(v.to_px());
+    }
 
     style
 }

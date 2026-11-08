@@ -180,7 +180,8 @@ impl<'a> LayoutBox<'a> {
             if let BoxType::BlockNode(node) = self.box_type {
                 if let NodeType::Text(t) = &node.node.node_type {
                     if !t.trim().is_empty() {
-                        children_height = (node.computed.font_size * node.computed.line_height).max(18.0);
+                        children_height =
+                            (node.computed.font_size * node.computed.line_height).max(18.0);
                     }
                 }
             }
@@ -226,7 +227,8 @@ impl<'a> LayoutBox<'a> {
                 let char_count = t.trim().chars().count();
                 // Estimate character width based on font-size
                 let char_width = style.font_size * 0.6;
-                estimated_width = (char_count as f32 * char_width).min(containing_block.content.width);
+                estimated_width =
+                    (char_count as f32 * char_width).min(containing_block.content.width);
             }
         }
 

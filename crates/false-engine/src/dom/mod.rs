@@ -121,11 +121,18 @@ impl Node {
                 out.push_str(&format!("{}[Document]\n", pad));
             }
             NodeType::Element(el) => {
-                let id_s = el.id.as_ref().map(|i| format!("#{}", i)).unwrap_or_default();
+                let id_s = el
+                    .id
+                    .as_ref()
+                    .map(|i| format!("#{}", i))
+                    .unwrap_or_default();
                 let class_s = if el.classes.is_empty() {
                     String::new()
                 } else {
-                    format!(".{}", el.classes.iter().cloned().collect::<Vec<_>>().join("."))
+                    format!(
+                        ".{}",
+                        el.classes.iter().cloned().collect::<Vec<_>>().join(".")
+                    )
                 };
                 out.push_str(&format!("{}<{}{}{}>\n", pad, el.tag_name, id_s, class_s));
             }

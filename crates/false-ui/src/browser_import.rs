@@ -48,8 +48,14 @@ fn now_secs() -> i64 {
 }
 
 fn extract_host(url: &str) -> String {
-    let clean = url.trim_start_matches("https://").trim_start_matches("http://");
-    clean.split(['/', '?', '#']).next().unwrap_or("").to_lowercase()
+    let clean = url
+        .trim_start_matches("https://")
+        .trim_start_matches("http://");
+    clean
+        .split(['/', '?', '#'])
+        .next()
+        .unwrap_or("")
+        .to_lowercase()
 }
 
 // ---------------------------------------------------------------------------
@@ -92,7 +98,8 @@ pub fn detect_installed() -> Vec<InstalledBrowser> {
     if brave_profile.exists() {
         let has_bm = brave_profile.join("Bookmarks").exists();
         let has_hi = brave_profile.join("History").exists();
-        let has_ck = brave_profile.join(r"Network\Cookies").exists() || brave_profile.join("Cookies").exists();
+        let has_ck = brave_profile.join(r"Network\Cookies").exists()
+            || brave_profile.join("Cookies").exists();
         list.push(InstalledBrowser {
             id: "brave".to_string(),
             name: "Brave".to_string(),
@@ -109,7 +116,8 @@ pub fn detect_installed() -> Vec<InstalledBrowser> {
     if chrome_profile.exists() {
         let has_bm = chrome_profile.join("Bookmarks").exists();
         let has_hi = chrome_profile.join("History").exists();
-        let has_ck = chrome_profile.join(r"Network\Cookies").exists() || chrome_profile.join("Cookies").exists();
+        let has_ck = chrome_profile.join(r"Network\Cookies").exists()
+            || chrome_profile.join("Cookies").exists();
         list.push(InstalledBrowser {
             id: "chrome".to_string(),
             name: "Google Chrome".to_string(),
@@ -126,7 +134,8 @@ pub fn detect_installed() -> Vec<InstalledBrowser> {
     if edge_profile.exists() {
         let has_bm = edge_profile.join("Bookmarks").exists();
         let has_hi = edge_profile.join("History").exists();
-        let has_ck = edge_profile.join(r"Network\Cookies").exists() || edge_profile.join("Cookies").exists();
+        let has_ck =
+            edge_profile.join(r"Network\Cookies").exists() || edge_profile.join("Cookies").exists();
         list.push(InstalledBrowser {
             id: "edge".to_string(),
             name: "Microsoft Edge".to_string(),
@@ -158,7 +167,12 @@ pub fn detect_installed() -> Vec<InstalledBrowser> {
     if opera_profile.exists() || operagx_profile.exists() {
         list.push(InstalledBrowser {
             id: "opera".to_string(),
-            name: if operagx_profile.exists() { "Opera GX" } else { "Opera" }.to_string(),
+            name: if operagx_profile.exists() {
+                "Opera GX"
+            } else {
+                "Opera"
+            }
+            .to_string(),
             hint: "Bookmarks and history".to_string(),
             icon_svg: opera_logo_svg().to_string(),
             has_bookmarks: true,
@@ -265,7 +279,8 @@ pub fn import_from_browsers(browser_ids: &[String], target_conn: &Connection) ->
                 if std::fs::copy(&hist_path, &temp_hist).is_ok() {
                     if let Ok(hist_conn) = Connection::open_with_flags(
                         &temp_hist,
-                        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_URI,
+                        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY
+                            | rusqlite::OpenFlags::SQLITE_OPEN_URI,
                     ) {
                         if let Ok(mut stmt) = hist_conn.prepare(
                             "SELECT url, title, last_visit_time FROM urls ORDER BY last_visit_time DESC LIMIT 1500",
@@ -311,7 +326,8 @@ pub fn import_from_browsers(browser_ids: &[String], target_conn: &Connection) ->
                 if std::fs::copy(&cookie_path, &temp_cookies).is_ok() {
                     if let Ok(ck_conn) = Connection::open_with_flags(
                         &temp_cookies,
-                        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY | rusqlite::OpenFlags::SQLITE_OPEN_URI,
+                        rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY
+                            | rusqlite::OpenFlags::SQLITE_OPEN_URI,
                     ) {
                         if let Ok(mut stmt) = ck_conn.prepare("SELECT count(*) FROM cookies") {
                             if let Ok(count) = stmt.query_row([], |row| row.get::<_, usize>(0)) {
@@ -341,8 +357,16 @@ fn extract_bookmark_items(node: &serde_json::Value, list: &mut Vec<(String, Stri
     if let Some(obj) = node.as_object() {
         let node_type = obj.get("type").and_then(|t| t.as_str()).unwrap_or("");
         if node_type == "url" {
-            let name = obj.get("name").and_then(|n| n.as_str()).unwrap_or("").to_string();
-            let url = obj.get("url").and_then(|u| u.as_str()).unwrap_or("").to_string();
+            let name = obj
+                .get("name")
+                .and_then(|n| n.as_str())
+                .unwrap_or("")
+                .to_string();
+            let url = obj
+                .get("url")
+                .and_then(|u| u.as_str())
+                .unwrap_or("")
+                .to_string();
             if !url.is_empty() {
                 list.push((name, url));
             }

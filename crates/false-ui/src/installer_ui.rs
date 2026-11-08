@@ -1,8 +1,8 @@
-use std::path::{Component, Path, PathBuf};
-use std::process::Command;
+use serde::{Deserialize, Serialize};
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
-use serde::{Deserialize, Serialize};
+use std::path::{Component, Path, PathBuf};
+use std::process::Command;
 
 #[cfg(windows)]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
@@ -48,7 +48,9 @@ fn validate_install_path(value: &str) -> Result<PathBuf, String> {
     if trimmed.is_empty() {
         return Err("Install folder is empty.".to_string());
     }
-    for forbidden in ['%', '"', '\'', '\r', '\n', '\0', ';', '&', '|', '<', '>', '$', '`'] {
+    for forbidden in [
+        '%', '"', '\'', '\r', '\n', '\0', ';', '&', '|', '<', '>', '$', '`',
+    ] {
         if trimmed.contains(forbidden) {
             return Err(format!(
                 "Install folder cannot contain the character '{}'.",
@@ -200,36 +202,87 @@ fn setup_registry(target_exe: &Path, install_dir: &Path, icon_path: &Path) {
         ("Publisher", "zaidi"),
         ("DisplayIcon", &format!("{},0", icon_str)),
         ("InstallLocation", &install_str),
-        ("UninstallString", &format!("\"{}\" --uninstaller", target_str)),
+        (
+            "UninstallString",
+            &format!("\"{}\" --uninstaller", target_str),
+        ),
     ];
 
     for (name, val) in entries {
         let mut cmd = Command::new("reg");
-        cmd.args(["add", uninstall_key, "/v", name, "/t", "REG_SZ", "/d", val, "/f"]);
+        cmd.args([
+            "add",
+            uninstall_key,
+            "/v",
+            name,
+            "/t",
+            "REG_SZ",
+            "/d",
+            val,
+            "/f",
+        ]);
         run_silent_command(&mut cmd);
     }
 
     for (name, val) in [("NoModify", "1"), ("NoRepair", "1")] {
         let mut cmd = Command::new("reg");
-        cmd.args(["add", uninstall_key, "/v", name, "/t", "REG_DWORD", "/d", val, "/f"]);
+        cmd.args([
+            "add",
+            uninstall_key,
+            "/v",
+            name,
+            "/t",
+            "REG_DWORD",
+            "/d",
+            val,
+            "/f",
+        ]);
         run_silent_command(&mut cmd);
     }
 
     // .flse file association
     let mut cmd = Command::new("reg");
-    cmd.args(["add", r"HKCU\Software\Classes\.flse", "/ve", "/d", "False.UpdatePackage", "/f"]);
+    cmd.args([
+        "add",
+        r"HKCU\Software\Classes\.flse",
+        "/ve",
+        "/d",
+        "False.UpdatePackage",
+        "/f",
+    ]);
     run_silent_command(&mut cmd);
 
     let mut cmd = Command::new("reg");
-    cmd.args(["add", r"HKCU\Software\Classes\False.UpdatePackage", "/ve", "/d", "False Browser Update Package", "/f"]);
+    cmd.args([
+        "add",
+        r"HKCU\Software\Classes\False.UpdatePackage",
+        "/ve",
+        "/d",
+        "False Browser Update Package",
+        "/f",
+    ]);
     run_silent_command(&mut cmd);
 
     let mut cmd = Command::new("reg");
-    cmd.args(["add", r"HKCU\Software\Classes\False.UpdatePackage\DefaultIcon", "/ve", "/d", &format!("{},0", icon_str), "/f"]);
+    cmd.args([
+        "add",
+        r"HKCU\Software\Classes\False.UpdatePackage\DefaultIcon",
+        "/ve",
+        "/d",
+        &format!("{},0", icon_str),
+        "/f",
+    ]);
     run_silent_command(&mut cmd);
 
     let mut cmd = Command::new("reg");
-    cmd.args(["add", r"HKCU\Software\Classes\False.UpdatePackage\shell\open\command", "/ve", "/d", &format!("\"{}\" \"%1\"", target_str), "/f"]);
+    cmd.args([
+        "add",
+        r"HKCU\Software\Classes\False.UpdatePackage\shell\open\command",
+        "/ve",
+        "/d",
+        &format!("\"{}\" \"%1\"", target_str),
+        "/f",
+    ]);
     run_silent_command(&mut cmd);
 }
 

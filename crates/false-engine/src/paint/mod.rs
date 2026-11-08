@@ -132,9 +132,12 @@ impl Canvas {
             // Alpha blending
             let alpha = color.a as f32 / 255.0;
             let inv_alpha = 1.0 - alpha;
-            self.pixels[idx] = ((color.r as f32 * alpha) + (self.pixels[idx] as f32 * inv_alpha)) as u8;
-            self.pixels[idx + 1] = ((color.g as f32 * alpha) + (self.pixels[idx + 1] as f32 * inv_alpha)) as u8;
-            self.pixels[idx + 2] = ((color.b as f32 * alpha) + (self.pixels[idx + 2] as f32 * inv_alpha)) as u8;
+            self.pixels[idx] =
+                ((color.r as f32 * alpha) + (self.pixels[idx] as f32 * inv_alpha)) as u8;
+            self.pixels[idx + 1] =
+                ((color.g as f32 * alpha) + (self.pixels[idx + 1] as f32 * inv_alpha)) as u8;
+            self.pixels[idx + 2] =
+                ((color.b as f32 * alpha) + (self.pixels[idx + 2] as f32 * inv_alpha)) as u8;
             self.pixels[idx + 3] = 255;
         }
     }
@@ -161,23 +164,38 @@ impl Canvas {
 
         // Top border
         for y in y0..(y0 + w) {
-            for x in x0..x1 { self.set_pixel(x, y, color); }
+            for x in x0..x1 {
+                self.set_pixel(x, y, color);
+            }
         }
         // Bottom border
         for y in (y1 - w)..y1 {
-            for x in x0..x1 { self.set_pixel(x, y, color); }
+            for x in x0..x1 {
+                self.set_pixel(x, y, color);
+            }
         }
         // Left border
         for y in y0..y1 {
-            for x in x0..(x0 + w) { self.set_pixel(x, y, color); }
+            for x in x0..(x0 + w) {
+                self.set_pixel(x, y, color);
+            }
         }
         // Right border
         for y in y0..y1 {
-            for x in (x1 - w)..x1 { self.set_pixel(x, y, color); }
+            for x in (x1 - w)..x1 {
+                self.set_pixel(x, y, color);
+            }
         }
     }
 
-    pub fn draw_text(&mut self, text: &str, start_x: i32, start_y: i32, font_size: f32, color: Color) {
+    pub fn draw_text(
+        &mut self,
+        text: &str,
+        start_x: i32,
+        start_y: i32,
+        font_size: f32,
+        color: Color,
+    ) {
         let scale = (font_size / 8.0).max(1.0).round() as i32;
         let char_spacing = 8 * scale;
         let mut cur_x = start_x;
@@ -204,7 +222,11 @@ impl Canvas {
                 if (byte & (1 << (7 - col))) != 0 {
                     for dy in 0..scale {
                         for dx in 0..scale {
-                            self.set_pixel(x0 + (col as i32) * scale + dx, y0 + (row as i32) * scale + dy, color);
+                            self.set_pixel(
+                                x0 + (col as i32) * scale + dx,
+                                y0 + (row as i32) * scale + dy,
+                                color,
+                            );
                         }
                     }
                 }
@@ -358,6 +380,6 @@ fn get_glyph_bitmap(ch: char) -> [u8; 8] {
         '/' => [0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00],
         '(' => [0x0C, 0x18, 0x30, 0x30, 0x30, 0x18, 0x0C, 0x00],
         ')' => [0x30, 0x18, 0x0C, 0x0C, 0x0C, 0x18, 0x30, 0x00],
-        _ =>   [0x00, 0x7E, 0x42, 0x42, 0x42, 0x7E, 0x00, 0x00], // Box fallback
+        _ => [0x00, 0x7E, 0x42, 0x42, 0x42, 0x7E, 0x00, 0x00], // Box fallback
     }
 }

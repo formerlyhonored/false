@@ -7,13 +7,16 @@ fn main() {
         .ok()
         .and_then(|p| p.file_stem().map(|s| s.to_string_lossy().to_lowercase()))
         .unwrap_or_default();
-    let is_setup = args.iter().any(|a| a == "--installer" || a == "--setup" || a == "--uninstaller")
+    let is_setup = args
+        .iter()
+        .any(|a| a == "--installer" || a == "--setup" || a == "--uninstaller")
         || exe_stem.contains("setup")
         || exe_stem.contains("installer")
         || exe_stem.contains("uninstall");
 
     if is_setup {
-        let temp_profile = std::env::temp_dir().join(format!("false_setup_wv2_{}", std::process::id()));
+        let temp_profile =
+            std::env::temp_dir().join(format!("false_setup_wv2_{}", std::process::id()));
         std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", temp_profile);
     }
 
@@ -49,7 +52,8 @@ fn main() {
                 .get(3)
                 .map(std::path::PathBuf::from)
                 .unwrap_or_else(|| std::path::PathBuf::from(format!("false-v{}.flse", version)));
-            match false_ui_lib::flse::create_package(&version, "False browser update", false, &out) {
+            match false_ui_lib::flse::create_package(&version, "False browser update", false, &out)
+            {
                 Ok(_) => println!("Successfully created {}", out.display()),
                 Err(e) => eprintln!("Error: {}", e),
             }

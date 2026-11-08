@@ -121,7 +121,9 @@ impl HtmlParser {
 
     fn parse_element(&mut self) -> Option<Node> {
         assert_eq!(self.next_char(), '<');
-        let tag_name = self.consume_while(|c| c.is_ascii_alphanumeric() || c == '-').to_lowercase();
+        let tag_name = self
+            .consume_while(|c| c.is_ascii_alphanumeric() || c == '-')
+            .to_lowercase();
         if tag_name.is_empty() {
             return None;
         }
@@ -154,7 +156,11 @@ impl HtmlParser {
                 }
             }
             self.embedded_styles.push(style_css.clone());
-            return Some(Node::element(tag_name, attributes, vec![Node::text(style_css)]));
+            return Some(Node::element(
+                tag_name,
+                attributes,
+                vec![Node::text(style_css)],
+            ));
         }
 
         let children = if is_void {
@@ -218,7 +224,20 @@ impl HtmlParser {
 fn is_void_element(tag: &str) -> bool {
     matches!(
         tag,
-        "area" | "base" | "br" | "col" | "embed" | "hr" | "img" | "input" | "link" | "meta" | "param" | "source" | "track" | "wbr"
+        "area"
+            | "base"
+            | "br"
+            | "col"
+            | "embed"
+            | "hr"
+            | "img"
+            | "input"
+            | "link"
+            | "meta"
+            | "param"
+            | "source"
+            | "track"
+            | "wbr"
     )
 }
 

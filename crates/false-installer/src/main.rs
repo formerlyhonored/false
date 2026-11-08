@@ -28,7 +28,10 @@ fn main() {
     println!("\x1b[1;36m==========================================================\x1b[0m");
 
     let install_dir = local_app_data().join("Programs").join("False");
-    println!("[1/5] Preparing installation directory: {}", install_dir.display());
+    println!(
+        "[1/5] Preparing installation directory: {}",
+        install_dir.display()
+    );
 
     // Stop existing instances if running
     let _ = Command::new("taskkill")

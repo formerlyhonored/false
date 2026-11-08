@@ -22,7 +22,6 @@ const UPDATE_PUBLIC_KEY_B64: &str = include_str!("../keys/update-signing.pub");
 const MAX_MANIFEST_BYTES: u64 = 256 * 1024;
 const MAX_ENTRY_BYTES: u64 = 512 * 1024 * 1024;
 
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct FlseManifest {
     pub name: String,
@@ -175,7 +174,10 @@ fn validate_package_relative_path(rel: &str) -> Result<(), String> {
                     return Err(format!("Unsafe package entry (stream): {}", rel));
                 }
                 if name.ends_with(' ') || name.ends_with('.') {
-                    return Err(format!("Unsafe package entry (trailing dot/space): {}", rel));
+                    return Err(format!(
+                        "Unsafe package entry (trailing dot/space): {}",
+                        rel
+                    ));
                 }
                 if is_reserved_windows_name(&name) {
                     return Err(format!("Unsafe package entry (reserved device): {}", rel));
@@ -201,10 +203,7 @@ fn validate_package_entries<R: Read + std::io::Seek>(
 ) -> Result<(), String> {
     for i in 0..zip.len() {
         let file = zip.by_index(i).map_err(|e| e.to_string())?;
-        let raw_name = file
-            .name()
-            .map_err(|e| e.to_string())?
-            .replace('\\', "/");
+        let raw_name = file.name().map_err(|e| e.to_string())?.replace('\\', "/");
         if raw_name.ends_with('/') {
             continue;
         }
@@ -272,7 +271,9 @@ pub fn apply_package_bytes(bytes: &[u8]) -> Result<FlseUpdateResult, String> {
 
     let ui_dir = crate::ui_root();
     let updates_dir = crate::data_dir().join("updates");
-    let backups_dir = crate::data_dir().join("backups").join(format!("backup_{}", now_stamp()));
+    let backups_dir = crate::data_dir()
+        .join("backups")
+        .join(format!("backup_{}", now_stamp()));
     let _ = std::fs::create_dir_all(&updates_dir);
     let _ = std::fs::create_dir_all(&backups_dir);
 
@@ -294,10 +295,15 @@ pub fn apply_package_bytes(bytes: &[u8]) -> Result<FlseUpdateResult, String> {
         }
 
         // Handle binary update
-        if normalized == "false-ui.exe" || normalized == "false.exe" || normalized.ends_with("/false-ui.exe") {
+        if normalized == "false-ui.exe"
+            || normalized == "false.exe"
+            || normalized.ends_with("/false-ui.exe")
+        {
             let target = updates_dir.join("false-ui_new.exe");
-            let mut out = File::create(&target).map_err(|e| format!("Cannot write staged binary: {}", e))?;
-            std::io::copy(&mut file, &mut out).map_err(|e| format!("Failed to extract binary: {}", e))?;
+            let mut out =
+                File::create(&target).map_err(|e| format!("Cannot write staged binary: {}", e))?;
+            std::io::copy(&mut file, &mut out)
+                .map_err(|e| format!("Failed to extract binary: {}", e))?;
             staged_binary = Some(target);
             updated_files.push("false-ui.exe (native binary)".to_string());
             continue;
@@ -338,7 +344,10 @@ pub fn apply_package_bytes(bytes: &[u8]) -> Result<FlseUpdateResult, String> {
     }
 
     if updated_files.is_empty() {
-        return Err("No update payload found in .flse package (expected index.html or false-ui.exe).".to_string());
+        return Err(
+            "No update payload found in .flse package (expected index.html or false-ui.exe)."
+                .to_string(),
+        );
     }
 
     // Record the installed version
@@ -349,7 +358,10 @@ pub fn apply_package_bytes(bytes: &[u8]) -> Result<FlseUpdateResult, String> {
         "description": manifest.description,
         "installed_at": now_stamp(),
     });
-    let _ = std::fs::write(&version_file, serde_json::to_string_pretty(&version_record).unwrap_or_default());
+    let _ = std::fs::write(
+        &version_file,
+        serde_json::to_string_pretty(&version_record).unwrap_or_default(),
+    );
 
     // If a binary was updated, trigger the hot restart updater script
     let requires_restart = staged_binary.is_some();
@@ -475,10 +487,12 @@ pub fn create_package(
     let signing_key = load_signing_key()?;
     let signature = signing_key.sign(&manifest_bytes);
 
-    zip.start_file("manifest.json", options).map_err(|e| e.to_string())?;
+    zip.start_file("manifest.json", options)
+        .map_err(|e| e.to_string())?;
     zip.write_all(&manifest_bytes).map_err(|e| e.to_string())?;
 
-    zip.start_file("manifest.sig", options).map_err(|e| e.to_string())?;
+    zip.start_file("manifest.sig", options)
+        .map_err(|e| e.to_string())?;
     zip.write_all(format!("{}\n", B64.encode(signature.to_bytes())).as_bytes())
         .map_err(|e| e.to_string())?;
 
@@ -488,7 +502,11 @@ pub fn create_package(
         for entry in entries.flatten() {
             let path = entry.path();
             if path.is_file() {
-                let fname = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+                let fname = path
+                    .file_name()
+                    .unwrap_or_default()
+                    .to_string_lossy()
+                    .to_string();
                 let zip_name = format!("ui/{}", fname);
                 if let Ok(data) = std::fs::read(&path) {
                     let _ = zip.start_file(zip_name, options);
@@ -508,7 +526,8 @@ pub fn create_package(
         }
     }
 
-    zip.finish().map_err(|e| format!("Failed to finalize .flse zip: {}", e))?;
+    zip.finish()
+        .map_err(|e| format!("Failed to finalize .flse zip: {}", e))?;
     Ok(())
 }
 
@@ -537,28 +556,20 @@ mod tests {
         let signature = key.sign(manifest);
         let encoded = B64.encode(signature.to_bytes());
 
-        assert!(verify_manifest_signature_with_key(
-            &key.verifying_key(),
-            manifest,
-            &encoded
-        )
-        .is_ok());
+        assert!(
+            verify_manifest_signature_with_key(&key.verifying_key(), manifest, &encoded).is_ok()
+        );
 
         let mut tampered = manifest.to_vec();
         tampered[0] = b'X';
-        assert!(verify_manifest_signature_with_key(
-            &key.verifying_key(),
-            &tampered,
-            &encoded
-        )
-        .is_err());
+        assert!(
+            verify_manifest_signature_with_key(&key.verifying_key(), &tampered, &encoded).is_err()
+        );
 
-        assert!(verify_manifest_signature_with_key(
-            &key.verifying_key(),
-            manifest,
-            "not-base64!"
-        )
-        .is_err());
+        assert!(
+            verify_manifest_signature_with_key(&key.verifying_key(), manifest, "not-base64!")
+                .is_err()
+        );
     }
 
     #[test]
@@ -574,7 +585,11 @@ mod tests {
         }
 
         let error = apply_package_bytes(&buffer).unwrap_err();
-        assert!(error.contains("manifest.sig"), "unexpected error: {}", error);
+        assert!(
+            error.contains("manifest.sig"),
+            "unexpected error: {}",
+            error
+        );
     }
 
     #[test]
@@ -597,6 +612,10 @@ mod tests {
         }
 
         let error = apply_package_bytes(&buffer).unwrap_err();
-        assert!(error.contains("signature verification failed"), "unexpected error: {}", error);
+        assert!(
+            error.contains("signature verification failed"),
+            "unexpected error: {}",
+            error
+        );
     }
 }

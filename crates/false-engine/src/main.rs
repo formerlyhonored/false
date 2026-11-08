@@ -12,7 +12,10 @@ fn main() {
     let (html_content, source_name) = if args.len() > 1 {
         let path_or_html = &args[1];
         if Path::new(path_or_html).exists() {
-            (fs::read_to_string(path_or_html).unwrap_or_default(), path_or_html.clone())
+            (
+                fs::read_to_string(path_or_html).unwrap_or_default(),
+                path_or_html.clone(),
+            )
         } else {
             (path_or_html.clone(), "inline argument".to_string())
         }
@@ -82,7 +85,10 @@ fn main() {
     println!("\n[1] DOM Tree Hierarchy:");
     println!("{}", result.dom_tree);
 
-    println!("[2] Display List Commands: {} items", result.display_list.len());
+    println!(
+        "[2] Display List Commands: {} items",
+        result.display_list.len()
+    );
     for (i, cmd) in result.display_list.iter().take(8).enumerate() {
         println!("  #{} {:?}", i + 1, cmd);
     }
