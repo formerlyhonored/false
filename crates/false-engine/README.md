@@ -1,103 +1,57 @@
-# ✦ Familiar Engine (`FamiliarCore`)
+# false-engine
 
-An autonomous, 100% native Rust browser engine designed for the **Familiar Browser**.
+An experimental, self-contained HTML/CSS layout and paint workbench written in
+Rust. It is used by the `false_engine_render` command in `false-ui` and can be
+run from the command line.
 
----
+It is **not** the engine behind normal browsing. False browses the web with
+WebView2; this crate is a separate experiment that rasterizes a small subset of
+HTML and CSS to a bitmap.
 
-## 1. Architecture Overview
-
-`FamiliarCore` replaces heavy, external multi-gigabyte Chromium runtimes with a modular, lightweight, and memory-safe Rust layout and rendering pipeline.
+## What it does
 
 ```
-Raw HTML / URL
-      │
-      ▼
-┌──────────────┐
-│ HTML Parser  │  ──> Builds Document Object Model (DOM Tree)
-└──────────────┘      & extracts embedded <style> blocks
-      │
-      ▼
-┌──────────────┐
-│  CSS Parser  │  ──> Parses Selectors, Cascade, Declarations & Units (px, em, rem, %)
-└──────────────┘
-      │
-      ▼
-┌──────────────┐
-│  Style Tree  │  ──> Specificity Matching & Computed Style Resolution (Display, Colors, Font, Margins)
-└──────────────┘
-      │
-      ▼
-┌──────────────┐
-│ Layout Engine│  ──> CSS Box Model: Margin, Border, Padding, Content Dimensions & Flow Position
-└──────────────┘
-      │
-      ▼
-┌──────────────┐
-│ Display List │  ──> Generates drawing primitives (SolidColor, Border, Text, Image)
-└──────────────┘
-      │
-      ▼
-┌──────────────┐
-│ Rasterizer   │  ──> Software Canvas Framebuffer (RGBA8888, Windows 32-bit BMP, Data URL)
-└──────────────┘
-      │
-      ▼
- Familiar Shell  (Rendered directly into browser tabs or native window)
+HTML string
+   -> HTML tokenizer + tree builder (dom/, html/)
+   -> CSS parser (css/)
+   -> style tree with specificity-based cascade (style/)
+   -> block layout with the CSS box model (layout/)
+   -> display list (paint/)
+   -> RGBA framebuffer, BMP export (lib.rs)
 ```
 
----
+| Module | Purpose |
+|---|---|
+| `dom/` | Node tree: elements, text, comments, attributes |
+| `html/` | Tag/text/comment tokenizer, entity decoding, void elements, `<style>` extraction |
+| `css/` | Stylesheet parser, simple selectors, hex/rgb/named colors, px/em/rem/% units, user-agent defaults |
+| `style/` | Cascade and specificity `(id, class, tag)`, computed values |
+| `layout/` | Block flow, box model, auto width, inline text sizing |
+| `paint/` | Display list, software rasterizer, bitmap font, BMP output |
+| `lib.rs` | `Engine::render(html, width, height) -> RenderOutput` |
+| `main.rs` | CLI renderer for a demo page, a file, or an inline snippet |
 
-## 2. Engine Pipeline Modules
+## Known limits
 
-| Module | File | Purpose |
-|---|---|---|
-| **DOM** | `src/dom/` | Node, ElementData, Text, Comment, Attribute maps, and tree pretty-printer |
-| **HTML Parser** | `src/html/` | Lexer, entity decoder (`&amp;`, `&lt;`, etc.), void tag recognition, embedded CSS extraction |
-| **CSS Parser** | `src/css/` | Selectors (tag, ID, class), Color parser (Hex, RGB, RGBA, named), Units (`px`, `em`, `rem`, `%`), User-Agent default stylesheet |
-| **Style Tree** | `src/style/` | Cascading order, selector specificity `(ID, Class, Tag)`, computed styles |
-| **Layout** | `src/layout/` | Box model (`content`, `padding`, `border`, `margin`), block flow, auto-width resolution, inline text sizing |
-| **Paint / Rasterizer**| `src/paint/` | Display list generator, in-memory RGBA framebuffer, built-in crisp bitmap font renderer, 32-bit BMP exporter |
-| **Pipeline API** | `src/lib.rs` | Public `Engine::render(html, width, height) -> RenderOutput` |
-| **CLI Runner** | `src/main.rs` | Standalone CLI benchmarker and frame renderer (`cargo run`) |
+- No JavaScript, no network loading, no images.
+- No flexbox, grid, floats, or positioning beyond normal block/inline flow.
+- Selectors cover tag, id, class, and descendant combinations only; no pseudo-classes.
+- Fonts are a built-in bitmap face; there is no system font stack.
+- The output is a single static frame, not a live document.
 
----
+Treat it as a sandbox for layout and rasterization experiments, not a browser
+engine roadmap.
 
-## 3. How Familiar Uses the Engine
-
-1. **Integrated Rust Backend:**
-   `familiar-engine` is imported as a direct dependency in `src-tauri/Cargo.toml`:
-   ```toml
-   [dependencies]
-   familiar-engine = { path = "../engine" }
-   ```
-
-2. **IPC Command (`src-tauri/src/lib.rs`):**
-   `familiar_engine_render(html, width, height)` executes the complete engine pipeline in Rust and returns:
-   - `data_url`: Base64 BMP image stream ready for canvas/tab rendering.
-   - `dom_tree`: Formatted DOM hierarchy.
-   - `command_count`: Number of display list draw commands.
-   - `render_time_ms`: Exact rasterization time in milliseconds.
-
-3. **Interactive Workbench in Familiar:**
-   - Navigate to `familiar://engine` in Familiar (or open **Settings > Native Browser Engine**).
-   - Write or edit HTML/CSS on the left and see it rendered live by the native Rust engine on the right.
-
----
-
-## 4. Running the Engine Standalone
-
-You can test and benchmark the engine independently from the command line:
+## Usage
 
 ```bash
-cd d:\Familiar\engine
-
-# Run built-in demo benchmark
-cargo run
-
-# Render any custom HTML file
-cargo run -- path/to/page.html
-
-# Render inline HTML snippet
-cargo run -- "<div style='background: red; padding: 20px;'><h1>Hello!</h1></div>"
+cargo run -p false-engine
+cargo run -p false-engine -- path/to/page.html
+cargo run -p false-engine -- "<div style='background:red;padding:20px'><h1>Hello</h1></div>"
 ```
-The engine outputs `familiar_rendered_frame.bmp` containing the rendered frame.
+
+The CLI writes `false_rendered_frame.bmp` in the working directory.
+
+From the shell, the same pipeline is exposed through the `false_engine_render`
+command, which returns a data URL, the DOM tree, the draw-command count, and the
+render time.

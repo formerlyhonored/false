@@ -1,9 +1,0 @@
-﻿[package]
-name = "false-css"
-version = "0.1.0"
-edition = "2021"
-authors = ["zaidi"]
-
-[dependencies]
-false-core = { path = "../false-core" }
-false-dom = { path = "../false-dom" }

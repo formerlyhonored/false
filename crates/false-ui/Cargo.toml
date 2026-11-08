@@ -17,11 +17,6 @@ path = "src/main.rs"
 [dependencies]
 false-engine = { path = "../false-engine" }
 false-core = { path = "../false-core" }
-false-net = { path = "../false-net" }
-false-dom = { path = "../false-dom" }
-false-css = { path = "../false-css" }
-false-layout = { path = "../false-layout" }
-false-render = { path = "../false-render" }
 tauri = { version = "2.0.0", features = ["unstable"] }
 tauri-plugin-opener = "2.0.0"
 serde = { version = "1.0", features = ["derive"] }

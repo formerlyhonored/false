@@ -111,22 +111,18 @@ node scripts/verify-manifest.mjs <manifest.json> <manifest.sig>
 ```
 crates/
   false-ui/          Shipping app: Tauri shell, installer, signed updates, UI
-  false-core/        Experimental engine: data structures and config
-  false-net/         Experimental engine: networking helpers
-  false-dom/         Experimental engine: HTML parser and DOM
-  false-css/         Experimental engine: CSS parser and cascade
-  false-layout/      Experimental engine: box layout
-  false-render/      Experimental engine: rasterizer
-  false-engine/      Experimental engine: pipeline coordinating the above
+  false-core/        Shared geometry and color primitives
+  false-engine/      Experimental, self-contained rendering workbench
   false-installer/   Command-line installer helper
 scripts/             Frontend checks and release signing tools
 versions/            Per-release notes
 website/             Static project page
 ```
 
-The `false-ui` crate is the browser users run. The other `false-*` crates are a
-separate, incomplete rendering workbench used for experiments and the
-`false_engine_render` command. They are not the engine behind normal browsing.
+The `false-ui` crate is the browser users run. `false-engine` is a small,
+incomplete HTML/CSS/layout/paint experiment used by the `false_engine_render`
+command; it is not the engine behind normal browsing, which is WebView2. Its
+[README](crates/false-engine/README.md) lists what it does and does not support.
 
 ## Repository hygiene
 
