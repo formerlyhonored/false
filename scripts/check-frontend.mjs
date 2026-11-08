@@ -15,6 +15,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
 
 const root = process.cwd();
 const indexPath = path.resolve(root, process.argv[2] || 'crates/false-ui/ui/index.html');
@@ -216,6 +217,23 @@ if (pkgVersion) {
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// 5. Every inline script block must parse. The UI is one scope, so a stray
+//    brace or a malformed guard takes the whole shell down at runtime.
+// ---------------------------------------------------------------------------
+const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*type=["'](?:application\/json|text\/template)["'])[^>]*>([\s\S]*?)<\/script>/gi)];
+inlineScripts.forEach((m, i) => {
+  const code = m[1];
+  if (!code.trim()) return;
+  // Wrapped in an async IIFE so top-level await/return are legal, matching how
+  // the shell actually runs (a single deferred script scope).
+  try {
+    new vm.Script(`(async()=>{\n${code}\n})`, { filename: `${relIndex}#script${i + 1}` });
+  } catch (e) {
+    err(`${relIndex}:${lineOf(m.index)}: inline script #${i + 1} does not parse: ${e.message}`);
+  }
+});
 
 // ---------------------------------------------------------------------------
 // Report
