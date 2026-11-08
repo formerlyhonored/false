@@ -1,6 +1,7 @@
 # Rust build artifacts
 /target/
 **/*.rs.bk
+crates/false-ui/gen/
 
 # Binary distributions & package outputs (these belong on GitHub Releases)
 FalseSetup.exe
